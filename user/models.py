@@ -11,7 +11,7 @@ class User:
         #Creating the user object
         user = {
             "_id": uuid.uuid4().hex,            #This will give a unique ID
-            "name": request.form.get("name"),
+            "name": request.form.get("name"),   
             "email": request.form.get("email"),
             "role": request.form.get("role"),
             "password": request.form.get("password")
@@ -19,6 +19,10 @@ class User:
         
         # Encrypting the passwords so they arent stored as plaintext in the database
         user['password'] = pbkdf2_sha256.encrypt(user['password'])
+        
+        #Make sure email doesnt already exist inside of the database
+        if db.users.find_one({ "email": user['email'] }):
+            return jsonify({ "error": "Email Adress Already Registered" }), 400
         
         
         
