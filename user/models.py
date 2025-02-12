@@ -26,7 +26,9 @@ class User:
         
         
         
-        db.users.insert_one(user)
+        if db.users.insert_one(user):
+            return jsonify(user), 200
+            
         
         #Returns user in a json format
-        return jsonify(user), 200 
+        return jsonify({ "error": "User Registration Failed" }), 400
