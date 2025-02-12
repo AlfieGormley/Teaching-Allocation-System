@@ -1,7 +1,13 @@
 from flask import Flask, render_template
+import pymongo
 
 #Create an instance of the app
 app = Flask(__name__)
+
+#Database
+client = pymongo.MongoClient("localhost", 27017)
+db = client.TAS
+
 
 #Routes
 from user import routes

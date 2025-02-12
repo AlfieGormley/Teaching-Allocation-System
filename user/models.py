@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from passlib.hash import pbkdf2_sha256
+from app import db
 import uuid
 
 class User:
@@ -18,6 +19,10 @@ class User:
         
         # Encrypting the passwords so they arent stored as plaintext in the database
         user['password'] = pbkdf2_sha256.encrypt(user['password'])
+        
+        
+        
+        db.users.insert_one(user)
         
         #Returns user in a json format
         return jsonify(user), 200 
