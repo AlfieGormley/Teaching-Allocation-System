@@ -1,6 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <div class = "card-wrapper">
+
+        <div class = "card">
+
+            <h1 class = "center"> Register New User </h1>
+
+            <form name="register_form" action="/user/register" method="POST">
+
+                <label for= "name">Name</label>
+                <input type= "text" name= "name" class="field" required>
+
+                <label for= "email">Email</label>
+                <input type= "email" name= "email" class="field" required>
+
+                <label for= "role">Role</label>
+                <select name="role" class="field" required>
+                    <option value="Teaching Associate">Teaching Associate</option>
+                    <option value="Module Leader">Module Leader</option>
+                </select>
+
+                <label for= "password">Password</label>
+                <input type= "password" name= "password" class="field" required>
+
+                <p class= "error error--hidden"> </p>
+
+                <input type= "submit" value = "Register" class= "btn">
+            
+            </form>
+
 
 <h1> Home </h1>
 
