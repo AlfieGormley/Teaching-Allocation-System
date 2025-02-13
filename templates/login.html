@@ -2,6 +2,27 @@
 
 {% block content %}
 
+<div class = "card-wrapper">
+
+    <div class = "card">
+
+        <h1 class = "center"> Login </h1>
+
+        <form name="login_form">
+
+
+            <label for= "email">Email</label>
+            <input type= "email" name= "email" class="field" required>
+
+            <label for= "password">Password</label>
+            <input type= "password" name= "password" class="field" required>
+
+            <p class= "error error--hidden"> </p>
+
+            <input type= "submit" value = "Login" class= "btn">
+        
+        </form>
+
 <h1> Login  </h1>
 
 {% endblock %}
