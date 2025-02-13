@@ -7,14 +7,18 @@
 
             <h1 class = "center"> Register New User </h1>
 
+            <!-- Form allowing the admin to create a users credentials -->
             <form name="register_form">
-
+                
+                <!-- Label to input user name -->
                 <label for= "name">Name</label>
                 <input type= "text" name= "name" class="field" required>
-
+                
+                <!-- Label to input user email -->
                 <label for= "email">Email</label>
                 <input type= "email" name= "email" class="field" required>
 
+                <!-- Label to select the user role -->
                 <label for= "role">Role</label>
                 <select name="role" class="field" required>
                     <option value="Teaching Associate">Teaching Associate</option>
@@ -22,16 +26,19 @@
                     <option value="Admin">Admin</option>
                 </select>
 
+                <!-- Label to select the user password -->
                 <label for= "password">Password</label>
                 <input type= "password" name= "password" class="field" required>
 
+                 <!-- Displays error messages -->
                 <p class= "error error--hidden"> </p>
 
+                <!-- Button to submit the form -->
                 <input type= "submit" value = "Register" class= "btn">
             
             </form>
 
 
-<h1> Home </h1>
+<h1> Admin Interface </h1>
 
 {% endblock %}

@@ -1,4 +1,7 @@
+
+<!-- Applys the base template --> 
 {% extends "base.html" %}
+
 
 {% block content %}
 
@@ -8,21 +11,24 @@
 
         <h1 class = "center"> Login </h1>
 
+        <!-- Form allowing the user to input their email and password-->
         <form name="login_form">
 
-
+            <!-- The type ensures a email valid format, name is used to retrive the input -->
             <label for= "email">Email</label>
             <input type= "email" name= "email" class="field" required>
 
+            <!-- The type ensures a password valid format, name is used to retrive the input -->
             <label for= "password">Password</label>
             <input type= "password" name= "password" class="field" required>
 
+            <!-- Displays error messages -->
             <p class= "error error--hidden"> </p>
 
+            <!-- Button to submit the form -->
             <input type= "submit" value = "Login" class= "btn">
         
         </form>
 
-<h1> Login  </h1>
 
 {% endblock %}
