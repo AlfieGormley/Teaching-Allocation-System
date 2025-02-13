@@ -15,12 +15,20 @@ from user import routes
 #Route to home
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('login.html')
 
 #Route to the dashboard, having the second / means theres only one route users can access
-@app.route('/dashboard/')
-def dashboard():
-    return render_template('dashboard.html')
+@app.route('/ta/')
+def ta():
+    return render_template('ta.html')
+
+@app.route('/ml/')
+def ml():
+    return render_template('ml.html')
+
+@app.route('/admin/')
+def admin():
+    return render_template('admin.html')
 
 
 
