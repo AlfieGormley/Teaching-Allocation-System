@@ -1,10 +1,14 @@
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, redirect
 from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
 
 class User:
 
+    def signout(self):
+        session.clear()
+        return redirect('/')
+    
     
     #Pass in self and a user object as parameters
     def start_session(self, user):
@@ -48,6 +52,8 @@ class User:
 
         #Returns a json response indicating an error
         return jsonify({ "error": "User Registration Failed" }), 400
+    
+    
     
     
     def login(self):
