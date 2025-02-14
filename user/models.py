@@ -23,7 +23,10 @@ class User:
         session['user'] = user
         
         #Return the succesful status to the front end:
-        return jsonify(user), 200
+        #return jsonify(user), 200
+
+        # Return user role in response
+        return jsonify({"role": user["role"]}), 200
     
     
     #self refers to an instance of the class
@@ -60,9 +63,12 @@ class User:
         
         #Query database for a matching email address
         user = db.users.find_one({
+            
+            #Retrieves the email input from the form
             "email": request.form.get('email')
         })
         
+        #If a user with that email exists a session is started
         if user:
             return self.start_session(user)
         

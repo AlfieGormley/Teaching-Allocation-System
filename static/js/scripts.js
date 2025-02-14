@@ -90,9 +90,17 @@ $("form[name='login_form']").submit(function(e) {
             //Logs the servers response in the console
             console.log(resp);
 
-            //This redirects to another page
-            window.location.href = "/ta/";
-            
+            // Redirect to appropriate page based on user role
+                if (resp.role === "Teaching Associate") {
+                    window.location.href = "/ta/";
+                } else if (resp.role === "Admin") {
+                    window.location.href = "/admin/";
+                } else if (resp.role === "Module Leader") {
+                    window.location.href = "/ml/";
+                } else {
+                    window.location.href = "/";  // Default redirect if no role matches
+                }
+
         },
         
         error: function(resp) {
