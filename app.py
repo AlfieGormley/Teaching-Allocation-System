@@ -12,20 +12,27 @@ app.secret_key = b"\x1a\xe2\xf9\x01K8'\xa7\x8c\x12\xddS\x88\x80R\xe1"
 client = pymongo.MongoClient("localhost", 27017)
 db = client.TAS
 
-#It must not be entering the first if statement if we are being redirected to the home page every time.
-#Decorators
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+
+def login_required(role=None):
+    
+    def decorator(f):
+        @wraps(f)
+        def wrap(*args, **kwargs):
+            #Check if user is logged in
+            if not session.get('logged_in') or 'user' not in session:
+                return redirect('/')  # Redirect to login page
+
+            #Check if user has the required role (if applicable)
+            if role and session['user'].get('role') != role:
+                return redirect('/unauthorized/')  # Redirect to unauthorized page
+
+
             return f(*args, **kwargs)
-        else:
-            return redirect('/')
-        
-    return wrap
+        return wrap
+    return decorator
+
+
             
-
-
 #Routes
 from user import routes
 
@@ -36,19 +43,25 @@ def home():
 
 #Route to the dashboard, having the second / means theres only one route users can access
 @app.route('/ta/')
-@login_required
+@login_required(role="Teaching Associate")
 def ta():
     return render_template('ta.html')
 
 @app.route('/ml/')
-@login_required
+@login_required(role="Module Leader")
 def ml():
     return render_template('ml.html')
 
 @app.route('/admin/')
-@login_required
+@login_required(role="Admin")
 def admin():
     return render_template('admin.html')
+
+@app.route('/unauthorized/')
+def unauthorized():
+    return render_template('unauthorized.html')
+
+
 
 
 
