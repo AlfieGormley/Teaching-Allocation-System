@@ -1,9 +1,26 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
 
 class User:
+
+    
+    #Pass in self and a user object as parameters
+    def start_session(self, user):
+        
+        #Removes the password from the session
+        del user['password']
+        
+        #Flag that a user is logged in
+        session['logged in'] = True
+        
+        #Stores the user dictionary inside of the session
+        session['user'] = user
+        
+        #Return the succesful status to the front end:
+        return jsonify(user), 200
+    
     
     #self refers to an instance of the class
     def register(self):
@@ -31,3 +48,16 @@ class User:
 
         #Returns a json response indicating an error
         return jsonify({ "error": "User Registration Failed" }), 400
+    
+    
+    def login(self):
+        
+        #Query database for a matching email address
+        user = db.users.find_one({
+            "email": request.form.get('email')
+        })
+        
+        if user:
+            return self.start_session(user)
+        
+        return jsonify({ "error": "Invalid Login Credentials" }), 401

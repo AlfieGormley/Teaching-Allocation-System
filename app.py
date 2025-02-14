@@ -4,6 +4,9 @@ import pymongo
 #Create an instance of the app
 app = Flask(__name__)
 
+#Secret key needed for sessions
+app.secret_key = b"\x1a\xe2\xf9\x01K8'\xa7\x8c\x12\xddS\x88\x80R\xe1"
+
 #Database
 client = pymongo.MongoClient("localhost", 27017)
 db = client.TAS

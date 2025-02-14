@@ -8,3 +8,9 @@ from user.models import User #Imports the user class into our routes file
 def register():
     #Creates an instance of the User class from models.py and calls the register method
     return User().register()
+
+#At this url the login() method of the User() class is called
+@app.route('/user/login', methods=['POST'])
+def login():
+    #Creates an instance of the User class from models.py and calls the login method
+    return User().login()
