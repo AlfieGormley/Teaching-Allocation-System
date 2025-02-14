@@ -90,6 +90,8 @@ $("form[name='login_form']").submit(function(e) {
             //Logs the servers response in the console
             console.log(resp);
 
+        
+
             // Redirect to appropriate page based on user role
                 if (resp.role === "Teaching Associate") {
                     window.location.href = "/ta/";

@@ -17,7 +17,7 @@ class User:
         del user['password']
         
         #Flag that a user is logged in
-        session['logged in'] = True
+        session['logged_in'] = True
         
         #Stores the user dictionary inside of the session
         session['user'] = user
@@ -26,6 +26,7 @@ class User:
         #return jsonify(user), 200
 
         # Return user role in response
+        
         return jsonify({"role": user["role"]}), 200
     
     
