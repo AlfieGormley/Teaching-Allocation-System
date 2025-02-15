@@ -18,11 +18,11 @@ def login_required(role=None):
     def decorator(f):
         @wraps(f)
         def wrap(*args, **kwargs):
-            #Check if user is logged in
+            #Check if user is logged in, if not logged in redirect to login page
             if not session.get('logged_in') or 'user' not in session:
                 return redirect('/')  # Redirect to login page
 
-            #Check if user has the required role (if applicable)
+            #Check if user has the required role
             if role and session['user'].get('role') != role:
                 return redirect('/unauthorized/')  # Redirect to unauthorized page
 

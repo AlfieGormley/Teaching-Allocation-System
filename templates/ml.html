@@ -8,4 +8,12 @@
     <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
 </div>
 
+{{ session['logged_in'] }}
+{{ session['user'] }}
+
+<form id="support_form">
+    <label for="support">Request Support:</label>
+    <button type="submit">Submit</button>
+</form>
+
 {% endblock %}

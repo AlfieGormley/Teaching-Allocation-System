@@ -42,6 +42,9 @@
                 <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
             </div>
 
+    {{ session['logged_in'] }}
+    {{ session['user'] }}
+
 <h1> Admin Interface </h1>
 
 {% endblock %}

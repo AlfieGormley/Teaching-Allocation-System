@@ -39,7 +39,9 @@ class User:
             "_id": uuid.uuid4().hex,            #Generates a random unique identifier converted to a hex string
             "name": request.form.get("name"),   
             "email": request.form.get("email"), 
-            "role": request.form.get("role"),   
+            "role": request.form.get("role"),
+            "skills": "",
+            "availability": "",   
             "password": request.form.get("password") 
         }
         
