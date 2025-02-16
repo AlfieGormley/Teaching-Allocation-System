@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from app import app #From the app file import app
 from user.models import User #Imports the user class into our routes file 
 
@@ -20,3 +20,6 @@ def login():
 def signout():
     #Creates an instance of the User class from models.py and calls the signout method
     return User().signout()
+
+
+

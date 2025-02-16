@@ -40,7 +40,7 @@ class User:
             "name": request.form.get("name"),   
             "email": request.form.get("email"), 
             "role": request.form.get("role"),
-            "skills": "",
+            "skills": [],
             "availability": "",   
             "password": request.form.get("password") 
         }
@@ -60,8 +60,6 @@ class User:
         return jsonify({ "error": "User Registration Failed" }), 400
     
     
-    
-    
     def login(self):
         
         #Query database for a matching email address
@@ -72,7 +70,18 @@ class User:
         })
         
         #If a user with that email exists a session is started
-        if user:
+        if user and pbkdf2_sha256.verify(request.form.get('password'), user['password']):
             return self.start_session(user)
         
         return jsonify({ "error": "Invalid Login Credentials" }), 401
+    
+
+
+
+        
+    
+    
+ 
+        
+        
+        

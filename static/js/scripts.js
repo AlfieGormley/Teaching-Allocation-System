@@ -35,9 +35,6 @@ $("form[name='register_form']").submit(function(e) {
 
             //Logs the servers response in the console
             console.log(resp);
-
-            //This redirects to another page
-            //window.location.href = "/ta/";
             
             $error.text("Registration successful!").removeClass("error--hidden").addClass("success");
         },
@@ -72,10 +69,10 @@ $("form[name='login_form']").submit(function(e) {
     //AJAX requests are sent to the backend
     $.ajax({
 
-        //Sends the request to the route which handles registration
+        //Sends the request to the route which handles login
         url: "/user/login",
 
-        //POST request is used to create a new user 
+        
         type: "POST",
 
         //Sends the form data
@@ -117,3 +114,5 @@ $("form[name='login_form']").submit(function(e) {
 
     
 });
+
+
