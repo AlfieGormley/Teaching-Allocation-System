@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from app import app #From the app file import app
 from user.models import User #Imports the user class into our routes file 
 
@@ -21,5 +21,15 @@ def signout():
     #Creates an instance of the User class from models.py and calls the signout method
     return User().signout()
 
+@app.route('/user/update_skills', methods=['POST'])
+def update_skills():
+    #form_data = request.form
+    #print("Data from form:", form_data)
+    #return jsonify(success=True, message="Skills updated successfully")
+    
+    return User().update_skills()
+
+    
+    
 
 

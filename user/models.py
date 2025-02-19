@@ -40,7 +40,7 @@ class User:
             "name": request.form.get("name"),   
             "email": request.form.get("email"), 
             "role": request.form.get("role"),
-            "skills": [],
+            #"skills": [],
             "availability": "",   
             "password": request.form.get("password") 
         }
@@ -74,6 +74,30 @@ class User:
             return self.start_session(user)
         
         return jsonify({ "error": "Invalid Login Credentials" }), 401
+    
+    
+    def update_skills(self):
+        skill = request.form
+        print("Data from form:", skill)
+        
+        #Retrieve user _id from the session
+        user_id = session.get('user').get('_id')
+        
+        print("Data from form and user_id:", skill, user_id)
+        
+        update_result = db.users.update_one(
+            {"_id": user_id},
+            {"$push": skill}
+        )
+        
+        if update_result.modified_count > 0:
+            return jsonify({"success": "Skills updated successfully"}), 200
+        else:
+            return jsonify({"error": "No updates made to skills"}), 304     #304 Status code mean Not Modifed
+        
+        
+        
+        
     
 
 
