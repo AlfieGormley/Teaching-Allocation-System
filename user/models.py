@@ -83,14 +83,14 @@ class User:
         #Retrieve user _id from the session
         user_id = session.get('user').get('_id')
         
-        if db.users.find_one({"_id": user_id, "skill": [skill]}):
+        if db.users.find_one({"_id": user_id, "skillset": [skill]}):
             return jsonify({"error": "Skill already listed"}), 409
         
         print("Data from form and user_id:", skill, user_id)
         
         update_result = db.users.update_one(
             {"_id": user_id},
-            {"$addToSet": {"skill": skill}}
+            {"$addToSet": {"skillset": skill}}
         )
         
         if update_result.modified_count > 0:
