@@ -32,6 +32,46 @@
             <option value="Visual Basic">Visual Basic</option>
         </select>
         <input type= "submit" value = "Add Skill" class= "btn">
-    </form>    
+    </form>
+    
+    <form name="remove_skills_form">
+        <label for="skills">Select a Skill to remove:</label>
+        <select name="skill" id="skills">
+            <option value="Python">Python</option>
+            <option value="Java">Java</option>
+            <option value="HTML">HTML</option>
+            <option value="C++">C++</option>
+            <option value="MATLAB">MATLAB</option>
+            <option value="SQL">SQL</option>
+            <option value="Flask">Flask</option>
+            <option value="Mongodb">Mongodb</option>
+            <option value="JS">JS</option>
+            <option value="C">C</option>
+            <option value="Visual Basic">Visual Basic</option>
+        </select>
+        <input type= "submit" value = "Remove Skill" class= "btn">
+    </form>
+
+
+    <body>
+        <h1>Skill Set</h1>
+        {% if skills %}
+        <ul>
+            {% for skill in skills %}
+            <li>{{ skill }}</li>
+            {% endfor %}
+        </ul>
+
+        {% else %}
+        <p>You currently have no skills listed.</p>
+        {% endif %}
+    </body>
+
+
+    <h1>Availability</h1>
+    <form id="availability_form">
+        <label for="availability">Update Your Availability:</label>
+        <input type= "submit" value = "Update" class= "btn">
+    </form>
 
 {% endblock %}

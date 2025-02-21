@@ -45,7 +45,13 @@ def home():
 @app.route('/ta/')
 @login_required(role="Teaching Associate")
 def ta():
-    return render_template('ta.html')
+    
+    
+    user_id = session.get('user').get('_id')
+    user = db.users.find_one({"_id": user_id})
+    skills = user.get('skillset', [])
+    
+    return render_template('ta.html', skills=skills)
 
 @app.route('/ml/')
 @login_required(role="Module Leader")

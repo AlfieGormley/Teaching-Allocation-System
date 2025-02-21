@@ -29,6 +29,15 @@ def update_skills():
     
     return User().update_skills()
 
+
+@app.route('/user/remove_skills', methods=['POST'])
+def remove_skills():
+    #form_data = request.form
+    #print("Data from form:", form_data)
+    #return jsonify(success=True, message="Skills updated successfully")
+    
+    return User().remove_skills()
+
     
     
 

@@ -99,6 +99,28 @@ class User:
             return jsonify({"error": "No updates made to skills"}), 304     #304 Status code mean Not Modifed
         
         
+    
+    def remove_skills(self):
+        skill = request.form.get('skill')
+        print("Data from form:", skill)
+        
+        #Retrieve user _id from the session
+        user_id = session.get('user').get('_id')
+        
+        print("Data from form and user_id:", skill, user_id)
+        
+        update_result = db.users.update_one(
+            {"_id": user_id},
+            {"$pull": {"skillset": skill}}
+        )
+        
+        if update_result.modified_count > 0:
+            return jsonify({"success": "Skill removed successfully"}), 200
+        else:
+            return jsonify({"error": "No updates made to skills"}), 304     #304 Status code mean Not Modifed
+        
+        
+        
         
         
     
