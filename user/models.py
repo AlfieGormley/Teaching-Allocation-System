@@ -40,7 +40,7 @@ class User:
             "name": request.form.get("name"),   
             "email": request.form.get("email"), 
             "role": request.form.get("role"),
-            #"skills": [],
+            "mobilie": True,
             "availability": "",   
             "password": request.form.get("password") 
         }
@@ -118,6 +118,43 @@ class User:
             return jsonify({"success": "Skill removed successfully"}), 200
         else:
             return jsonify({"error": "No updates made to skills"}), 304     #304 Status code mean Not Modifed
+        
+    
+    def delete_user(self):
+        user = request.form.get('user_dropdown')
+        print("Data from form:", user)
+        
+        db.users.delete_one({"name": user})
+        
+    
+    def change_password(self):
+        new_password = request.form.get("new_password")
+        print("New Password:", new_password)
+        print("Encryptd New Passwors", pbkdf2_sha256.encrypt(new_password))
+        
+        #Retrieve user _id from the session
+        user_id = session.get('user').get('_id')
+        
+        modified = db.users.update_one(
+            {"_id": user_id},
+            {"$set": {"password": pbkdf2_sha256.encrypt(new_password)}}
+        )
+        
+        if modified.modified_count == 1:
+            return jsonify({"success": "Password updated successfully"}), 200
+        else:
+            return jsonify({"error": "No changes made to the password"}), 400
+        
+        
+        
+        
+        
+        
+    
+   
+        
+        
+        
         
         
         

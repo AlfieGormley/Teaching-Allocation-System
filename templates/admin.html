@@ -43,15 +43,22 @@
             </div>
 
             <body>
-
-                <select id="userDropdown">
+            
+                
+            <form name="remove_user_form">
+                <label for="skills">Select a User to Delete:</label>
+                <select name="user_dropdown"id="user_dropdown">
                     <option>Select a user</option>
                     {% for name in user_names %}
                         <option value="{{ name }}">{{ name }}</option>
                     {% endfor %}
                 </select>
+                <input type= "submit" value = "Remove From Database" class= "btn">
+            
+            </form>
 
-            </body>
+            </body> 
+
 
     {{ session['logged_in'] }}
     {{ session['user'] }}

@@ -38,6 +38,27 @@ def remove_skills():
     
     return User().remove_skills()
 
+
+
+@app.route('/user/delete_user', methods=['POST'])
+def delete_user():
+    #form_data = request.form
+    #print("Data from form:", form_data)
+    #return jsonify(success=True, message="Skills updated successfully")
+    return User().delete_user()
+
+
+@app.route('/user/change_password', methods=['POST'])
+def change_password():
+   
+   return User().change_password()
+   
+   
+    
+    
+    
+    
+
     
     
 

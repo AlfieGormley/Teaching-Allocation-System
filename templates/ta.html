@@ -52,6 +52,16 @@
         <input type= "submit" value = "Remove Skill" class= "btn">
     </form>
 
+   
+    <form name="change_password_form" method="post">
+        
+        <label for="new_password">New Password:</label>
+        <input type= "password" name= "new_password" class="field" required>
+    
+        <input type="submit" value="Change Password">
+    </form>
+    
+
 
     <body>
         <h1>Skill Set</h1>
@@ -66,7 +76,6 @@
         <p>You currently have no skills listed.</p>
         {% endif %}
     </body>
-
 
     <h1>Availability</h1>
     <form id="availability_form">
