@@ -42,6 +42,17 @@
                 <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
             </div>
 
+            <body>
+
+                <select id="userDropdown">
+                    <option>Select a user</option>
+                    {% for name in user_names %}
+                        <option value="{{ name }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+
+            </body>
+
     {{ session['logged_in'] }}
     {{ session['user'] }}
 

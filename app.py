@@ -45,8 +45,7 @@ def home():
 @app.route('/ta/')
 @login_required(role="Teaching Associate")
 def ta():
-    
-    
+
     user_id = session.get('user').get('_id')
     user = db.users.find_one({"_id": user_id})
     skills = user.get('skillset', [])
@@ -61,7 +60,11 @@ def ml():
 @app.route('/admin/')
 @login_required(role="Admin")
 def admin():
-    return render_template('admin.html')
+    
+    all_users = db.users.find({}, {"_id": 1, "name": 1})
+    user_names = [user['name'] for user in all_users]
+
+    return render_template('admin.html', user_names = user_names)
 
 @app.route('/unauthorized/')
 def unauthorized():
