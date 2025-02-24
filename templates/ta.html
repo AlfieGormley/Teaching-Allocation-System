@@ -11,10 +11,6 @@
     {{ session['logged_in'] }}
     {{ session['user'] }}
 
-    <form id="availability_form">
-        <label for="availability">Set Your Availability:</label>
-        <input type= "submit" value = "Update" class= "btn">
-    </form>
 
     <form name="skills_form">
         <label for="skills">Select a Skill to Add:</label>
@@ -86,10 +82,44 @@
         {% endif %}
     </body>
 
-    <h1>Availability</h1>
-    <form id="availability_form">
-        <label for="availability">Update Your Availability:</label>
+    <form name="availability_form">
+        <label for="availability">Set Your Availability:</label>
+
+        <label for="date"> Select Date: </label>
+        <input type= "date" id = "date" name= "date" required>
+
+        <label for="start_time">Start Time:</label>
+        <input type="time" id="start_time" name="start_time" required>
+
+        <label for="end_time">End Time:</label>
+        <input type="time" id="end_time" name="end_time" required>
+
+
         <input type= "submit" value = "Update" class= "btn">
     </form>
+
+
+    <body>
+        <h1>Availability</h1>
+        {% if availability %}
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+        </tr>
+        {% for slot in availability %}
+        <tr>
+            <td>{{ slot['date'].strftime('%Y-%m-%d') }}</td>
+            <td>{{ slot['start_time'].strftime('%H:%M') }}</td>
+            <td>{{ slot['end_time'].strftime('%H:%M') }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No availability listed.</p>
+    {% endif %}
+    </body>
+    
 
 {% endblock %}

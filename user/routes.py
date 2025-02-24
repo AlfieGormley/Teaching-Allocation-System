@@ -61,6 +61,12 @@ def toggle_mobile():
    
    #return jsonify(success=True, message="Skills updated successfully")
    return User().toggle_mobile()
+
+
+@app.route('/user/set_availability', methods=['POST'])
+def set_availability():
+    
+   return User().set_availability()
    
    
     

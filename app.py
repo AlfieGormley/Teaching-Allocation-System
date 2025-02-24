@@ -50,7 +50,10 @@ def ta():
     user = db.users.find_one({"_id": user_id})
     skills = user.get('skillset', [])
     
-    return render_template('ta.html', skills=skills)
+    availability = list(db.availability.find({"user_id": user_id}))
+    print(availability)
+    
+    return render_template('ta.html', skills=skills, availability=availability)
 
 @app.route('/ml/')
 @login_required(role="Module Leader")

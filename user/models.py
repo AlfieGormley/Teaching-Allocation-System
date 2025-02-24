@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, session, redirect
 from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
+from datetime import datetime
 
 class User:
 
@@ -167,6 +168,53 @@ class User:
             
         
         return jsonify({"success": "this worked"}), 200
+    
+    
+    def set_availability(self):
+        
+        date = request.form.get("date")
+        start_time = request.form.get("start_time")
+        end_time = request.form.get("end_time")
+        
+        date = datetime.strptime(date, '%Y-%m-%d').date()
+        start_datetime = datetime.strptime(f"{date} {start_time}", '%Y-%m-%d %H:%M')
+        end_datetime = datetime.strptime(f"{date} {end_time}", '%Y-%m-%d %H:%M')
+        
+        print(type(date))
+        
+        
+       
+        
+        date_datetime = datetime.combine(date, datetime.min.time())
+        
+        print(type(start_datetime))
+        print(type(end_datetime))
+        print(type(date_datetime))
+        
+        #Retrieve user _id from the session
+        user_id = session.get('user').get('_id')
+        
+        
+        #Availability document
+        availability = {
+            "_id": uuid.uuid4().hex,
+            "user_id" : user_id,
+            "date": date_datetime,
+            "start_time": start_datetime,
+            "end_time": end_datetime
+        }
+        
+        db.availability.insert_one(availability)
+        
+        
+        
+        
+        
+        
+        
+        
+        return jsonify({"success": "this worked"}), 200
+        
         
             
         
