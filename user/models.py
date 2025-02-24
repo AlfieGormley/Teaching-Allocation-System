@@ -40,7 +40,7 @@ class User:
             "name": request.form.get("name"),   
             "email": request.form.get("email"), 
             "role": request.form.get("role"),
-            "mobilie": True,
+            "mobility_issue": False,
             "availability": "",   
             "password": request.form.get("password") 
         }
@@ -145,6 +145,30 @@ class User:
         else:
             return jsonify({"error": "No changes made to the password"}), 400
         
+        
+    def toggle_mobile(self):
+        form_data = request.form.get("toggle")
+        print("Form Data:", form_data)
+
+        #Retrieve user _id from the session
+        user_id = session.get('user').get('_id')
+        
+        if form_data == "yes":
+            result = db.users.update_one(
+            {"_id": user_id},  # Ensure user_id is correctly formatted as ObjectId
+            {"$set": {"mobility_issue": True}}
+        )
+            
+        else:
+            result = db.users.update_one(
+            {"_id": user_id},  # Ensure user_id is correctly formatted as ObjectId
+            {"$set": {"mobility_issue": False}}
+        )
+            
+        
+        return jsonify({"success": "this worked"}), 200
+        
+            
         
         
         

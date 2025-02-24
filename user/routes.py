@@ -52,6 +52,15 @@ def delete_user():
 def change_password():
    
    return User().change_password()
+
+
+@app.route('/user/toggle_mobile', methods=['POST'])
+def toggle_mobile():
+   #form_data = request.form.get("toggle")
+   #print("Data from form:", form_data)
+   
+   #return jsonify(success=True, message="Skills updated successfully")
+   return User().toggle_mobile()
    
    
     
