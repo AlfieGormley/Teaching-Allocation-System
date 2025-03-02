@@ -73,6 +73,12 @@ def admin():
 def unauthorized():
     return render_template('unauthorized.html')
 
+@app.route('/test/')
+def test():
+    return render_template('test.html')
+
+
+
 
 
 

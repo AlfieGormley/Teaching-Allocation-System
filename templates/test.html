@@ -2,37 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>User Login</title>
-
-    {#Links to our css style sheet#}
-    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Date Range Picker Test</title>
 
     <!-- Include necessary libraries -->
-    <script src="/static/js/jquery.js"> </script>
-
+    <script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
-    
 </head>
 <body>
     
-    {% block content%}
-     {# Template will be inserted here #}
-    {% endblock %}
+    <input type="text" id="daterange" />
 
-    {#Links our js files#}
-    {#<script src="/static/js/jquery.js"> </script>#}
-
-    <script src="/static/js/scripts.js"> </script>
-
-
-    
+    <script>
+        $(document).ready(function() {
+            $('#daterange').daterangepicker();
+        });
+    </script>
 
 </body>
 </html>
-
