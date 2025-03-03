@@ -91,15 +91,22 @@
     <body>
         <h1>Availability</h1>
         {% if availability %}
-    <table>
+    <table id="availability_table">
         <tr>
+            <th>Start Date</th>
             <th>Start Time</th>
+            <th>End Date</th>
             <th>End Time</th>
         </tr>
         {% for slot in availability %}
-        <tr>
+        <tr data-id= "{{ slot['_id'] }}">
+            <td>{{ slot['start_time'].strftime('%Y-%m-%d') }}</td>
             <td>{{ slot['start_time'].strftime('%H:%M') }}</td>
+            <td>{{ slot['end_time'].strftime('%Y-%m-%d') }}</td>
             <td>{{ slot['end_time'].strftime('%H:%M') }}</td>
+            <td>
+                <button class="delete-btn" data-id="{{ slot['_id'] }}">Remove</button>
+            </td>
         </tr>
         {% endfor %}
     </table>
