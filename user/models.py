@@ -170,26 +170,25 @@ class User:
         return jsonify({"success": "this worked"}), 200
     
     
+    
+    
+    
     def set_availability(self):
+        form_data = request.get_json()
+        print("Data from form:", form_data)
         
-        date = request.form.get("date")
-        start_time = request.form.get("start_time")
-        end_time = request.form.get("end_time")
+        print(type(form_data))
         
-        date = datetime.strptime(date, '%Y-%m-%d').date()
-        start_datetime = datetime.strptime(f"{date} {start_time}", '%Y-%m-%d %H:%M')
-        end_datetime = datetime.strptime(f"{date} {end_time}", '%Y-%m-%d %H:%M')
+        start_date_str = form_data.get('start_date')
+        end_date_str = form_data.get('end_date')
         
-        print(type(date))
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d %H:%M")
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d %H:%M")
         
+        print(f"Start Date: {start_date}, End Date: {end_date}")
         
-       
-        
-        date_datetime = datetime.combine(date, datetime.min.time())
-        
-        print(type(start_datetime))
-        print(type(end_datetime))
-        print(type(date_datetime))
+        print(type(start_date))
+        print(type(end_date))
         
         #Retrieve user _id from the session
         user_id = session.get('user').get('_id')
@@ -199,21 +198,21 @@ class User:
         availability = {
             "_id": uuid.uuid4().hex,
             "user_id" : user_id,
-            "date": date_datetime,
-            "start_time": start_datetime,
-            "end_time": end_datetime
+            "start_time": start_date,
+            "end_time": end_date
         }
         
         db.availability.insert_one(availability)
         
         
+        return jsonify(success=True, message="Avaiability Updated")
         
         
         
         
         
         
-        return jsonify({"success": "this worked"}), 200
+        
         
         
             

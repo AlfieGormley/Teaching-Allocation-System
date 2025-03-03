@@ -85,21 +85,7 @@
         {% endif %}
     </body>
 
-    <form name="availability_form">
-        <label for="availability">Set Your Availability:</label>
-
-        <label for="date"> Select Date: </label>
-        <input type= "date" id = "date" name= "date" required>
-
-        <label for="start_time">Start Time:</label>
-        <input type="time" id="start_time" name="start_time" required>
-
-        <label for="end_time">End Time:</label>
-        <input type="time" id="end_time" name="end_time" required>
-
-
-        <input type= "submit" value = "Update" class= "btn">
-    </form>
+    
 
 
     <body>
@@ -107,13 +93,11 @@
         {% if availability %}
     <table>
         <tr>
-            <th>Date</th>
             <th>Start Time</th>
             <th>End Time</th>
         </tr>
         {% for slot in availability %}
         <tr>
-            <td>{{ slot['date'].strftime('%Y-%m-%d') }}</td>
             <td>{{ slot['start_time'].strftime('%H:%M') }}</td>
             <td>{{ slot['end_time'].strftime('%H:%M') }}</td>
         </tr>
@@ -127,23 +111,17 @@
 
     
     <body>
+        <form name="availability_form">
 
         <input type="text" name="datetimes" />
 
-        <script>
-        $(function() {
-            $('input[name="datetimes"]').daterangepicker({
-                timePicker: true,
-                startDate: moment().startOf('hour'),
-                endDate: moment().startOf('hour').add(32, 'hour'),
-                locale: {
-                format: 'M/DD hh:mm A'
-                }
-            });
-        });
-        </script>
+
+
+    </form>
 
     </body>
     
 
 {% endblock %}
+
+

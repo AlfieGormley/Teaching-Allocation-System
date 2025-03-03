@@ -382,53 +382,49 @@ $("form[name='toggle_mobile_form']").submit(function(e) {
 });
 
 
-//Finds the form with name:remove_skills_form, when submitted it run this function
-$("form[name='availability_form']").submit(function(e) {
-    
-    //Prevents the page reloading
-    e.preventDefault();
 
-    //Stores the form object
-    var $form = $(this);
 
-    //Finds the error class to display error messages
-    var $error = $form.find(".error");
+$(document).ready(function() {
+    console.log("Document ready - Checking for Date Range Picker...");
 
-    //Collects the data submitted from the form to be sent to the server as a POST request
-    var data = $form.serialize();
+    if ($('form[name="availability_form"]').length) {
+        console.log("Initializing Date Range Picker on ta.html");
 
-    //AJAX requests are sent to the backend
-    $.ajax({
+        $('input[name="datetimes"]').daterangepicker({
+            timePicker: true,
+            startDate: moment().startOf('hour'),
+            endDate: moment().startOf('hour').add(32, 'hour'),
+            locale: { format: 'M/DD hh:mm A' }
+        });
 
-        //Sends the request to the route which handles skill updates
-        url: "/user/set_availability",
+        //Listen for apply event
+        $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+            console.log("Date Range Selected:", picker.startDate.format('YYYY-MM-DD HH:mm'), "to", picker.endDate.format('YYYY-MM-DD HH:mm'));
 
-        //POST request
-        type: "POST",
+            // Prepare the data to send
+            var formData = {
+                start_date: picker.startDate.format('YYYY-MM-DD HH:mm'),
+                end_date: picker.endDate.format('YYYY-MM-DD HH:mm')
+            };
 
-        //Sends the form data
-        data: data,
-
-        //Expecting a json response
-        dataType: "json",
-
-        //If the response is succesfull
-        success: function(resp) {
-
-            //Logs the servers response in the console
-            console.log(resp);
             
-            $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
-        },
+            // Send data to the backend via AJAX
+            $.ajax({
+                url: "/user/set_availability",  
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),  // Convert to JSON
+                dataType: "json",
+                success: function(response) {
+                    console.log("Server Response:", response);
+                    //alert("Availability data received successfully!");
+                },
+                error: function(error) {
+                    console.error("Error sending data:", error);
+                    //alert("An error occurred while sending data.");
+                }
+            });
+        });
 
-        error: function(resp) {
-
-            //Logs the error response in the browser console
-            console.log(resp);
-
-            //This will look at our models.py file and return the appropriate error message
-           // $error.text(resp.responseJSON.error).removeClass("error--hidden"); 
-        }
-    });
-
+    } 
 });
