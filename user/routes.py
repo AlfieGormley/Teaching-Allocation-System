@@ -63,9 +63,6 @@ def toggle_mobile():
    return User().toggle_mobile()
 
 
-
-   
-   
 @app.route('/user/set_availability', methods=['POST'])
 def set_availability():
    

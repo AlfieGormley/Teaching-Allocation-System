@@ -53,7 +53,23 @@ def ta():
     availability = list(db.availability.find({"user_id": user_id}))
     print(availability)
     
-    return render_template('ta.html', skills=skills, availability=availability)
+    availability_data = []
+
+    for slot in availability:
+        # Extract date as YYYY-MM-DD from 'date' or 'start_time'
+        date_str = slot.get('date') or slot.get('start_time')  # Use 'start_time' if 'date' is missing
+        date_str = date_str.strftime('%Y-%m-%d')  # Convert datetime to string
+
+        availability_data.append({
+            "date": date_str,
+            "start_time": slot['start_time'].strftime('%H:%M'),  # Convert time to HH:MM
+            "end_time": slot['end_time'].strftime('%H:%M')       # Convert time to HH:MM
+        })
+    
+    print(availability_data)
+    
+    
+    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data)
 
 @app.route('/ml/')
 @login_required(role="Module Leader")
@@ -73,9 +89,9 @@ def admin():
 def unauthorized():
     return render_template('unauthorized.html')
 
-@app.route('/test/')
-def test():
-    return render_template('test.html')
+@app.route('/cal/')
+def cal():
+    return render_template('cal.html')
 
 
 

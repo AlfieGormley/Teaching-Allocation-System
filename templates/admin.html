@@ -47,7 +47,7 @@
                 
             <form name="remove_user_form">
                 <label for="skills">Select a User to Delete:</label>
-                <select name="user_dropdown"id="user_dropdown">
+                <select name="user_dropdown"id="users_dropdown">
                     <option>Select a user</option>
                     {% for name in user_names %}
                         <option value="{{ name }}">{{ name }}</option>
@@ -56,7 +56,7 @@
                 <input type= "submit" value = "Remove From Database" class= "btn">
             
             </form>
-
+            
             </body> 
 
 
