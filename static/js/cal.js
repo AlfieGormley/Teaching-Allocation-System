@@ -12,8 +12,16 @@ if (typeof availability_data !== "undefined") {
         // slot.date is already in YYYY-MM-DD format.
         let fullDate = slot.date;
         let timeRange = `${slot.start_time} - ${slot.end_time}`;
-        availabilityDates.push(fullDate);
-        availabilityMap[fullDate] = timeRange;
+
+        if (!availabilityMap[fullDate]) {
+            availabilityMap[fullDate] = [];
+            availabilityDates.push(fullDate);
+        }
+
+        availabilityMap[fullDate].push(timeRange);
+
+        //availabilityDates.push(fullDate);
+        //availabilityMap[fullDate] = timeRange;
     });
 }
 
@@ -184,7 +192,11 @@ function showCalendar(month, year) {
                 // Check if the date exists in our availabilityDates array
                 if (availabilityDates.includes(fullDate)) {
                     cell.classList.add("available"); // Apply the available style (green highlight)
-                    cell.setAttribute("title", `Available: ${availabilityMap[fullDate]}`);
+
+                    let tooltipText = "Available: " + availabilityMap[fullDate].join("; ");
+                    cell.setAttribute("title", tooltipText);
+
+                    //cell.setAttribute("title", `Available: ${availabilityMap[fullDate]}`);
                 }
                 
 
