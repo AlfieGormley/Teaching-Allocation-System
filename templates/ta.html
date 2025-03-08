@@ -117,14 +117,7 @@
     
 
     
-    <body>
-        <form name="availability_form">
-
-        <input type="text" name="datetimes" />
-
-    </form>
-
-    </body>
+    
 
     <!--Testing trying to move calendar to ta.html-->
     <div class="container-calendar">
@@ -178,23 +171,23 @@
 
     
    
-    <div id="availabilityForm" class="modal">
+    <div id="availability_form" class="modal">
         <div class="modal-content">
             <!-- x button that calls the close_form function -->
             <span class="close" onclick="close_form()">&times;</span>
             <h2>Set Availability</h2>
-            <form id="availabilityFormContent">
+            <form id="availability_form_content">
 
-                <label for="availabilityDate">Date:</label>
-                <input type="text" id="availabilityDate" readonly>
+                <label for="availability_date">Date:</label>
+                <input type="text" id="availability_date" name="availability_date" readonly>
 
                 <label for="startTime">Start Time:</label>
-                <input type="time" id="startTime">
+                <input type="time" id="start_time" name="start_time">
 
                 <label for="endTime">End Time:</label>
-                <input type="time" id="endTime">
+                <input type="time" id="end_time" name="end_time">
 
-                <input type="submit" value="Set Availability">
+                <input type="submit" value="Set Availability" class= "btn">
             </form>
         </div>
     </div>

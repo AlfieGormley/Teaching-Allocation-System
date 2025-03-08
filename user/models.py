@@ -206,6 +206,37 @@ class User:
         
         
         return jsonify(success=True, message="Avaiability Updated")
+    
+    
+    def set_availability2(self):
+        
+        availability_date = request.form.get('availability_date')
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        
+        start_datetime_str = f"{availability_date} {start_time}"
+        end_datetime_str = f"{availability_date} {end_time}"
+        
+        start_date = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M")
+        end_date = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M")
+
+        
+        #Retrieve user _id from the session
+        user_id = session.get('user').get('_id')
+        
+        
+        #Availability document
+        availability = {
+            "_id": uuid.uuid4().hex,
+            "user_id" : user_id,
+            "start_time": start_date,
+            "end_time": end_date
+        }
+        
+        db.availability.insert_one(availability)
+        
+        
+        return jsonify(success=True, message="Avaiability Updated")
         
         
         

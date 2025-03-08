@@ -63,19 +63,23 @@ def toggle_mobile():
    return User().toggle_mobile()
 
 
+#@app.route('/user/set_availability', methods=['POST'])
+#def set_availability():
+   
+#   return User().set_availability()
+
+
+
 @app.route('/user/set_availability', methods=['POST'])
 def set_availability():
-   
-   return User().set_availability()
-
-
-
-@app.route('/user/setAvailability', methods=['POST'])
-def setAvailability():
-    form_data = request.form    #.get("availabilityFormContent")
-    print("Data from form:", form_data)
-   
-    return jsonify(success=True, message="setAvailability updated successfully")
+    
+    return User().set_availability2()
+    
+    
+    
+    
+    
+    
    
    
     

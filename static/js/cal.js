@@ -288,10 +288,10 @@ showCalendar(currentMonth, currentYear);
 
 
 function open_form(date) {
-    document.getElementById("availabilityDate").value = date;
-    document.getElementById("availabilityForm").style.display = "block";
+    document.getElementById("availability_date").value = date;
+    document.getElementById("availability_form").style.display = "block";
 }
 
 function close_form() {
-    document.getElementById("availabilityForm").style.display = "none";
+    document.getElementById("availability_form").style.display = "none";
 }
