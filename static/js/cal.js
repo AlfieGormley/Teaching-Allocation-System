@@ -219,6 +219,11 @@ function showCalendar(month, year) {
 						createEventTooltip(date, month, year)
 				);
 				}
+
+
+                cell.addEventListener("click", function () {
+                    open_form(fullDate);
+                });
                 
                 //Adds the cell to the row and increments the date
 				row.appendChild(cell);
@@ -279,3 +284,14 @@ function daysInMonth(iMonth, iYear) {
 
 // Call the showCalendar function initially to display the calendar
 showCalendar(currentMonth, currentYear);
+
+
+
+function open_form(date) {
+    document.getElementById("availabilityDate").value = date;
+    document.getElementById("availabilityForm").style.display = "block";
+}
+
+function close_form() {
+    document.getElementById("availabilityForm").style.display = "none";
+}

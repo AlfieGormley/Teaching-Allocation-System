@@ -176,12 +176,43 @@
     </div>
 
 
+    
+   
+    <div id="availabilityForm" class="modal">
+        <div class="modal-content">
+            <!-- x button that calls the close_form function -->
+            <span class="close" onclick="close_form()">&times;</span>
+            <h2>Set Availability</h2>
+            <form id="availabilityFormContent">
+
+                <label for="availabilityDate">Date:</label>
+                <input type="text" id="availabilityDate" readonly>
+
+                <label for="startTime">Start Time:</label>
+                <input type="time" id="startTime">
+
+                <label for="endTime">End Time:</label>
+                <input type="time" id="endTime">
+
+                <input type="submit" value="Set Availability">
+            </form>
+        </div>
+    </div>
+
+
+    
+
+
+
+
+
+
     <script>
         // This makes the Python availability_data available to JavaScript.
         let availability_data = {{ availability_data | tojson }};
     </script>
 
-    
+
 
     <script src="/static/js/cal.js"></script>
 

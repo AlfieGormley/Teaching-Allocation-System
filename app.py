@@ -61,6 +61,7 @@ def ta():
         date_str = date_str.strftime('%Y-%m-%d')  # Convert datetime to string
 
         availability_data.append({
+            "_id": slot['_id'],
             "date": date_str,
             "start_time": slot['start_time'].strftime('%H:%M'),  # Convert time to HH:MM
             "end_time": slot['end_time'].strftime('%H:%M')       # Convert time to HH:MM
