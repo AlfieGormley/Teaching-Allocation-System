@@ -69,6 +69,33 @@
 
 </div>
 
+
+    <div id="request_support_form" class="modal">
+        <div class="modal-content">
+            <!-- x button that calls the close_form function -->
+            <span class="close" onclick="close_form()">&times;</span>
+            <h2>Request Support</h2>
+            <form id="equest_support_form">
+
+                <label for="availability_date">Date:</label>
+                <input type="text" id="availability_date" name="availability_date" readonly>
+
+                <label for="startTime">Start Time:</label>
+                <input type="time" id="start_time" name="start_time">
+
+                <label for="endTime">End Time:</label>
+                <input type="time" id="end_time" name="end_time">
+
+                <input type="submit" value="Set Availability" class= "btn">
+            </form>
+        </div>
+    </div>
+
+<p>User Role: {{ role }}</p>
+<body data-role="{{ role }}">
+
+
+
 <script src="/static/js/cal.js"></script>
 
 

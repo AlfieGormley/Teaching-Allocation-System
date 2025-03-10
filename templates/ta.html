@@ -187,11 +187,8 @@
         </div>
     </div>
 
-
-    
-
-
-
+    <p>User Role: {{ role }}</p>
+    <body data-role="{{ role }}">
 
 
 
@@ -199,7 +196,6 @@
         // This makes the Python availability_data available to JavaScript.
         let availability_data = {{ availability_data | tojson }};
     </script>
-
 
 
     <script src="/static/js/cal.js"></script>

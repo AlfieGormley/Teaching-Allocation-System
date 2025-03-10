@@ -58,6 +58,8 @@ def ta():
 
     #Get the _id of the user in session
     user_id = session.get('user').get('_id')
+    role = session.get('user').get('role')
+    
     
     #Query the skillset of appropriate _id from collection users
     user = db.users.find_one({"_id": user_id})
@@ -81,12 +83,17 @@ def ta():
         })
     
     
-    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data, compsci_skills=compsci_skills)
+    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data, compsci_skills=compsci_skills, role=role)
 
 @app.route('/ml/')
 @login_required(role="Module Leader")
 def ml():
-    return render_template('ml.html')
+    
+    user_id = session.get('user').get('_id')
+    role = session.get('user').get('role')
+    
+    
+    return render_template('ml.html', role=role, user_id=user_id)
 
 @app.route('/admin/')
 @login_required(role="Admin")

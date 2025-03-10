@@ -288,10 +288,51 @@ showCalendar(currentMonth, currentYear);
 
 
 function open_form(date) {
+
+    var user_role = document.body.getAttribute("data-role").trim(); 
+
+    console.log("User role:", user_role);
+
+
     document.getElementById("availability_date").value = date;
-    document.getElementById("availability_form").style.display = "block";
+
+    console.log("User role:", user_role); 
+
+    if (user_role == "Module Leader") {
+
+        console.log("Opening request support form"); // Debugging
+        // If the user is a Module Leader, open the request support form
+        document.getElementById("request_support_form").style.display = "block";
+    } else {
+        console.log("Opening availability form");
+        // If the user is not a Module Leader, open the availability form
+        document.getElementById("availability_form").style.display = "block";
+    }
+
+
+    //document.getElementById("availability_date").value = date;
+    //document.getElementById("availability_form").style.display = "block";
 }
 
+
 function close_form() {
-    document.getElementById("availability_form").style.display = "none";
+
+    var user_role = document.body.getAttribute("data-role").trim(); 
+
+    console.log("User role:", user_role);
+
+
+    if (user_role == "Module Leader") {
+        console.log("Closingf request support form"); // Debugging
+        // If the user is a Module Leader, open the request support form
+        document.getElementById("request_support_form").style.display = "none";
+    } else {
+        console.log("Closing availability form");
+        // If the user is not a Module Leader, open the availability form
+        document.getElementById("availability_form").style.display = "none";
+    }
+
+
+
+    
 }
