@@ -78,27 +78,42 @@ class User:
     
     
     def update_skills(self):
-        skill = request.form.get('skill')
-        print("Data from form:", skill)
         
-        #Retrieve user _id from the session
+        #This gets us the _id of the skill we want to update
+        skill_id = request.form.get('skill')
+        
+        
+        #Get the _id of the user in session
         user_id = session.get('user').get('_id')
         
-        if db.users.find_one({"_id": user_id, "skillset": [skill]}):
-            return jsonify({"error": "Skill already listed"}), 409
+        #Go to the corresponding skill in the compsci_skills collection
+        skill = db.compsci_skills.find_one({"_id": skill_id})
+        if not skill:
+            return jsonify({"error": "Skill not found"}), 404
         
-        print("Data from form and user_id:", skill, user_id)
+        skill_name = skill['name']
         
         update_result = db.users.update_one(
             {"_id": user_id},
-            {"$addToSet": {"skillset": skill}}
+            {"$addToSet": {"skillset": skill_name}}
         )
         
         if update_result.modified_count > 0:
-            return jsonify({"success": "Skills updated successfully"}), 200
-        else:
-            return jsonify({"error": "No updates made to skills"}), 304     #304 Status code mean Not Modifed
+            
+            db.compsci_skills.update_one(
+                {"_id": skill_id},
+                {"$addToSet": {"users": user_id}}
+            )
         
+            return jsonify({"success": f"Skill {skill_name} added successfully"}), 200
+        else:
+            return jsonify({"error": "No updates made to skills"}), 304
+        
+        
+    
+        
+        
+       
         
     
     def remove_skills(self):
@@ -171,44 +186,7 @@ class User:
     
     
     
-    
-    
     def set_availability(self):
-        form_data = request.get_json()
-        print("Data from form:", form_data)
-        
-        print(type(form_data))
-        
-        start_date_str = form_data.get('start_date')
-        end_date_str = form_data.get('end_date')
-        
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d %H:%M")
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d %H:%M")
-        
-        print(f"Start Date: {start_date}, End Date: {end_date}")
-        
-        print(type(start_date))
-        print(type(end_date))
-        
-        #Retrieve user _id from the session
-        user_id = session.get('user').get('_id')
-        
-        
-        #Availability document
-        availability = {
-            "_id": uuid.uuid4().hex,
-            "user_id" : user_id,
-            "start_time": start_date,
-            "end_time": end_date
-        }
-        
-        db.availability.insert_one(availability)
-        
-        
-        return jsonify(success=True, message="Avaiability Updated")
-    
-    
-    def set_availability2(self):
         
         availability_date = request.form.get('availability_date')
         start_time = request.form.get('start_time')
@@ -237,6 +215,26 @@ class User:
         
         
         return jsonify(success=True, message="Avaiability Updated")
+    
+    
+    def add_new_skill(self):
+        new_skill = request.form.get('new_skill')
+    
+        
+        existing_skill = db.compsci_skills.find_one({"name": new_skill})
+        
+        if existing_skill:
+            return jsonify(success=False, message="Skill already exists in collection"), 409
+        
+        new_skill_doc = {
+            "_id": uuid.uuid4().hex,
+            "name": new_skill,
+            "users": []
+        }
+        
+        db.compsci_skills.insert_one(new_skill_doc)
+    
+        return jsonify(success=True, message="Skill added successfully!")
         
         
         

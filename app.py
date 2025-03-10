@@ -45,13 +45,26 @@ def home():
 @app.route('/ta/')
 @login_required(role="Teaching Associate")
 def ta():
+    
+    #find the _id and name of each skill inside the collection
+    compsci_skill_cursor =  db.compsci_skills.find({}, {"_id": 1, "name": 1})
+    
+    #Store results in a dictionary
+    compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
+    
+    print(compsci_skills)
+    
+    
 
+    #Get the _id of the user in session
     user_id = session.get('user').get('_id')
+    
+    #Query the skillset of appropriate _id from collection users
     user = db.users.find_one({"_id": user_id})
     skills = user.get('skillset', [])
     
     availability = list(db.availability.find({"user_id": user_id}))
-    print(availability)
+    
     
     availability_data = []
 
@@ -67,10 +80,8 @@ def ta():
             "end_time": slot['end_time'].strftime('%H:%M')       # Convert time to HH:MM
         })
     
-    print(availability_data)
     
-    
-    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data)
+    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data, compsci_skills=compsci_skills)
 
 @app.route('/ml/')
 @login_required(role="Module Leader")
@@ -83,6 +94,8 @@ def admin():
     
     all_users = db.users.find({}, {"_id": 1, "name": 1})
     user_names = [user['name'] for user in all_users]
+    
+    
 
     return render_template('admin.html', user_names = user_names)
 
@@ -90,9 +103,7 @@ def admin():
 def unauthorized():
     return render_template('unauthorized.html')
 
-@app.route('/cal/')
-def cal():
-    return render_template('cal.html')
+
 
 
 

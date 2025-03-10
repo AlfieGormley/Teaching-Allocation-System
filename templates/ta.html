@@ -17,39 +17,34 @@
 
     <form name="skills_form">
         <label for="skills">Select a Skill to Add:</label>
+
         <select name="skill" id="skills">
-            <option value="Python">Python</option>
-            <option value="Java">Java</option>
-            <option value="HTML">HTML</option>
-            <option value="C++">C++</option>
-            <option value="MATLAB">MATLAB</option>
-            <option value="SQL">SQL</option>
-            <option value="Flask">Flask</option>
-            <option value="Mongodb">Mongodb</option>
-            <option value="JS">JS</option>
-            <option value="C">C</option>
-            <option value="Visual Basic">Visual Basic</option>
+
+            {% for skill in compsci_skills %}
+            <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  <!--  -->
+            {% endfor %}
         </select>
         <input type= "submit" value = "Add Skill" class= "btn">
     </form>
+
+    <p>{{ compsci_skills }}</p>
+
     
     <form name="remove_skills_form">
         <label for="skills">Select a Skill to remove:</label>
         <select name="skill" id="skills">
-            <option value="Python">Python</option>
-            <option value="Java">Java</option>
-            <option value="HTML">HTML</option>
-            <option value="C++">C++</option>
-            <option value="MATLAB">MATLAB</option>
-            <option value="SQL">SQL</option>
-            <option value="Flask">Flask</option>
-            <option value="Mongodb">Mongodb</option>
-            <option value="JS">JS</option>
-            <option value="C">C</option>
-            <option value="Visual Basic">Visual Basic</option>
+
+            {% for skill in compsci_skills %}
+            <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  
+            {% endfor %}
         </select>
         <input type= "submit" value = "Remove Skill" class= "btn">
     </form>
+
+
+    
+
+
 
    
     <form name="change_password_form" method="post">

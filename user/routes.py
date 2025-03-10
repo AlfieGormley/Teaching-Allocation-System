@@ -52,7 +52,13 @@ def toggle_mobile():
 
 @app.route('/user/set_availability', methods=['POST'])
 def set_availability():
-    return User().set_availability2()
+    return User().set_availability()
+
+@app.route('/user/add_new_skill', methods=['POST'])
+def add_new_skill():
+    
+    
+    return User().add_new_skill()
     
     
     

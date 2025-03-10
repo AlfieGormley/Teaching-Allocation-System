@@ -60,9 +60,29 @@
             </body> 
 
 
+            <form name="add_new_skill_form" method="post">
+        
+                <label for="new_skill">Add a New Skill:</label>
+                <input type= "text" id="new_skill" name= "new_skill" class="field" placeholder="Enter skill"required>
+            
+                <input type="submit" value="Add Skill" class="btn">
+            </form>
+
+            <form name="remove_skill_form" method="post">
+        
+                <label for="remove_skill">Select a Skill to Remove:</label>
+                <select name="skill" id="remove_skill"
+            
+                <input type="submit" value="Remove Skill" class="btn">
+            </form>
+
+
+
     {{ session['logged_in'] }}
     {{ session['user'] }}
 
 <h1> Admin Interface </h1>
+
+    
 
 {% endblock %}
