@@ -111,29 +111,48 @@ class User:
         
         
     
+    def remove_skills(self):
+        
+        #This gets us the _id of the skill we want to remove
+        skill_id = request.form.get('skill')
+        
+        
+        #Get the _id of the user in session
+        user_id = session.get('user').get('_id')
+        
+        #Go to the corresponding skill in the compsci_skills collection
+        skill = db.compsci_skills.find_one({"_id": skill_id})
+        if not skill:
+            return jsonify({"error": "Skill not found"}), 404
+        
+        skill_name = skill['name']
+        
+        #Remove that skill name from the users skillset array and also remove the users _id from the users array in compsci_skills
+        update_user_result = db.users.update_one(
+            {"_id": user_id},
+            {"$pull": {"skillset": skill_name}}  # Remove the skill name from the user's skillset
+        )
+        
+        if update_user_result.modified_count == 0:
+            return jsonify({"error": "Skill not found in user's skillset"}), 404
+        
+        update_skill_result = db.compsci_skills.update_one(
+        {"_id": skill_id},
+        {"$pull": {"users": user_id}}  # Remove the user's _id from the 'users' array in the skill document
+        )
+        
+        if update_skill_result.modified_count == 0:
+            return jsonify({"error": "User's _id not found in skill's users array"}), 404
+    
+        return jsonify({"success": f"Skill {skill_name} removed successfully"}), 200
+        
+        
+    
+        
         
         
        
         
-    
-    def remove_skills(self):
-        skill = request.form.get('skill')
-        print("Data from form:", skill)
-        
-        #Retrieve user _id from the session
-        user_id = session.get('user').get('_id')
-        
-        print("Data from form and user_id:", skill, user_id)
-        
-        update_result = db.users.update_one(
-            {"_id": user_id},
-            {"$pull": {"skillset": skill}}
-        )
-        
-        if update_result.modified_count > 0:
-            return jsonify({"success": "Skill removed successfully"}), 200
-        else:
-            return jsonify({"error": "No updates made to skills"}), 304     #304 Status code mean Not Modifed
         
     
     def delete_user(self):
