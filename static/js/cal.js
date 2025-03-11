@@ -220,10 +220,18 @@ function showCalendar(month, year) {
 				);
 				}
 
-
+                //Left Click
                 cell.addEventListener("click", function () {
                     open_form(fullDate);
                 });
+
+                //Right Click
+                cell.addEventListener("contextmenu", function (event) {
+                    event.preventDefault();
+                    //open_form(fullDate);
+                    showManageEventsButton(event, fullDate)
+                })
+
                 
                 //Adds the cell to the row and increments the date
 				row.appendChild(cell);
@@ -335,4 +343,42 @@ function close_form() {
 
 
     
+}
+
+
+// Function to show the "Manage Events" button on right-click
+function showManageEventsButton(event, date) {
+    let button = document.getElementById("manage-events-button");
+
+    if (!button) {
+        button = document.createElement("button");
+        button.id = "manage-events-button";
+        button.textContent = "Manage Events";
+        button.style.position = "absolute";
+        button.style.padding = "8px";
+        button.style.background = "#007bff";
+        button.style.color = "#fff";
+        button.style.border = "none";
+        button.style.cursor = "pointer";
+        button.style.zIndex = "1000";
+        document.body.appendChild(button);
+    }
+
+    button.style.left = `${event.pageX}px`;
+    button.style.top = `${event.pageY}px`;
+    button.style.display = "block";
+
+    button.onclick = function () {
+        open_manage_availability_form(date);
+    };
+
+    document.addEventListener("click", function () {
+        button.style.display = "none";
+    }, { once: true });
+}
+
+function open_manage_availability_form(date) {
+    document.getElementById("manage_availability_date").value = date;
+    document.getElementById("manage_availability_form").style.display = "block";
+
 }

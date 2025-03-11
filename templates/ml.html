@@ -80,13 +80,20 @@
                 <label for="availability_date">Date:</label>
                 <input type="text" id="availability_date" name="availability_date" readonly>
 
+                <label for="skills">Required Skills:</label>
+                <select name="skills" id="skills" multiple>
+                    {% for skill in compsci_skills %}
+                        <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>
+                    {% endfor %}
+                </select>
+
                 <label for="startTime">Start Time:</label>
                 <input type="time" id="start_time" name="start_time">
 
                 <label for="endTime">End Time:</label>
                 <input type="time" id="end_time" name="end_time">
 
-                <input type="submit" value="Set Availability" class= "btn">
+                <input type="submit" value="Request Support" class= "btn">
             </form>
         </div>
     </div>

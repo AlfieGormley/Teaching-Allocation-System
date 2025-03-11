@@ -148,13 +148,6 @@ class User:
         
         
     
-        
-        
-        
-       
-        
-        
-    
     def delete_user(self):
         user = request.form.get('user_dropdown')
         print("Data from form:", user)
@@ -255,6 +248,25 @@ class User:
     
         return jsonify(success=True, message="Skill added successfully!")
         
+    def admin_remove_skill(self):
+        
+        #Gets the _id of the skill we want to remove
+        skill_id = request.form.get('skill')
+        
+
+        skill = db.compsci_skills.find_one({"_id": skill_id})
+        
+
+        # Remove skill from compsci_skills collection
+        db.compsci_skills.delete_one({"_id": skill_id})
+        
+        #Remove the skill from all users' skillset
+        db.users.update_many(
+            {},  # This means all users
+            {"$pull": {"skillset": skill['name']}}  # Remove skill by name
+        )
+        
+        return jsonify({"success": f"Skill '{skill}' removed successfully"}), 200
         
         
         

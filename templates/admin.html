@@ -68,10 +68,17 @@
                 <input type="submit" value="Add Skill" class="btn">
             </form>
 
-            <form name="remove_skill_form" method="post">
+
+            <form name="admin_remove_skill_form" method="POST">
         
                 <label for="remove_skill">Select a Skill to Remove:</label>
-                <select name="skill" id="remove_skill"
+
+                <select name="skill" id="skills">
+
+                    {% for skill in compsci_skills %}
+                    <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  
+                    {% endfor %}
+                </select>
             
                 <input type="submit" value="Remove Skill" class="btn">
             </form>

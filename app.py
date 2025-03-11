@@ -89,22 +89,35 @@ def ta():
 @login_required(role="Module Leader")
 def ml():
     
+    
+    #find the _id and name of each skill inside the collection
+    compsci_skill_cursor =  db.compsci_skills.find({}, {"_id": 1, "name": 1})
+    
+    #Store results in a dictionary
+    compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
+    
     user_id = session.get('user').get('_id')
     role = session.get('user').get('role')
     
     
-    return render_template('ml.html', role=role, user_id=user_id)
+    return render_template('ml.html', role=role, user_id=user_id, compsci_skills=compsci_skills)
 
 @app.route('/admin/')
 @login_required(role="Admin")
 def admin():
+    
+    #find the _id and name of each skill inside the collection
+    compsci_skill_cursor =  db.compsci_skills.find({}, {"_id": 1, "name": 1})
+    
+    #Store results in a dictionary
+    compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
     
     all_users = db.users.find({}, {"_id": 1, "name": 1})
     user_names = [user['name'] for user in all_users]
     
     
 
-    return render_template('admin.html', user_names = user_names)
+    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills)
 
 @app.route('/unauthorized/')
 def unauthorized():

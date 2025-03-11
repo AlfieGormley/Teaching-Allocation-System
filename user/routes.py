@@ -19,6 +19,8 @@ def login():
 def signout():
     return User().signout()
 
+
+
 @app.route('/user/update_skills', methods=['POST'])
 def update_skills():
     return User().update_skills()
@@ -26,6 +28,7 @@ def update_skills():
 
 @app.route('/user/remove_skills', methods=['POST'])
 def remove_skills():
+    
     return User().remove_skills()
 
 
@@ -59,6 +62,18 @@ def add_new_skill():
     
     
     return User().add_new_skill()
+
+@app.route('/user/admin_remove_skill', methods=['POST'])
+def admin_remove_skill():
+    
+    return User().admin_remove_skill()
+    
+    
+    
+    
+    
+    
+    
     
     
     
