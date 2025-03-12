@@ -382,3 +382,7 @@ function open_manage_availability_form(date) {
     document.getElementById("manage_availability_form").style.display = "block";
 
 }
+
+function close_manage_availability_form() {
+    document.getElementById("manage_availability_form").style.display = "none";
+}
