@@ -228,7 +228,7 @@ function showCalendar(month, year) {
                 //Right Click
                 cell.addEventListener("contextmenu", function (event) {
                     event.preventDefault();
-                    //open_form(fullDate);
+                    
                     showManageEventsButton(event, fullDate)
                 })
 
@@ -242,7 +242,7 @@ function showCalendar(month, year) {
 		tbl.appendChild(row);
 	}
 
-	displayReminders();
+	//displayReminders();
 }
 
 
@@ -331,18 +331,15 @@ function close_form() {
 
 
     if (user_role == "Module Leader") {
-        console.log("Closingf request support form"); // Debugging
-        // If the user is a Module Leader, open the request support form
+        console.log("Closing request support form"); // Debugging
+        // If the user is a Module Leader, close the request support form
         document.getElementById("request_support_form").style.display = "none";
     } else {
         console.log("Closing availability form");
-        // If the user is not a Module Leader, open the availability form
+        // If the user is not a Module Leader, close the availability form
         document.getElementById("availability_form").style.display = "none";
     }
 
-
-
-    
 }
 
 
@@ -377,8 +374,42 @@ function showManageEventsButton(event, date) {
     }, { once: true });
 }
 
+
+
 function open_manage_availability_form(date) {
     document.getElementById("manage_availability_date").value = date;
+	
+	console.log("availability_data:", typeof(availability_data));
+
+	//Finds the container for the availaibility_list and Clears previous availability for when a new date is selected
+	const availability_list = document.getElementById("availability_list");
+    availability_list.innerHTML = ""; 
+
+	//Retrieves availability data for the given date
+	const filtered_availability = availability_data.filter(slot => slot.date === date);
+
+	//Debugging
+	console.log("Filtered availability:", filtered_availability);
+
+	if (filtered_availability.length > 0) {
+
+		//Iterates over each slot in the array
+		filtered_availability.forEach(slot => {
+
+			//Creates a new paragraph element for each availability slot
+            const slot_element = document.createElement("p");
+
+			//The text content inside the slot element
+            slot_element.textContent = `${slot.start_time} - ${slot.end_time}`;
+
+			//Adds the slot element to availability_list
+            availability_list.appendChild(slot_element);
+        });
+	} else {
+		availability_list.innerHTML = "<p>You have no availability set for this date.</p>";
+	}
+
+	//Changes the display style making the form visible
     document.getElementById("manage_availability_form").style.display = "block";
 
 }
