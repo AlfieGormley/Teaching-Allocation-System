@@ -3,7 +3,7 @@
 /* General styling for the entire page */
 body {
 	font-family: Arial, sans-serif;
-	background-color: white;
+	background-color: rgb(173, 214, 246);
 	margin: 0;
 }
 
@@ -263,4 +263,35 @@ body {
     float: right;
     font-size: 20px;
     cursor: pointer;
+}
+
+
+
+
+
+
+
+/* Container for each availability slot */
+.availability-slot {
+    display: flex; /* Use flexbox to align the elements horizontally */
+    align-items: center; /* Vertically align items in the center */
+}
+
+/* Style the availability text (start and end time) */
+.availability-text {
+    margin-right: 10px; /* Adds space between the time and the button */
+}
+
+/* Style the Drop button */
+.drop-button {
+    padding: 5px 10px; /* Adds padding to the button */
+    background-color: #ff4d4d; /* Red background color */
+    color: white; /* White text color */
+    border: none;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+.drop-button:hover {
+    background-color: #e60000; /* Darker red on hover */
 }

@@ -60,13 +60,18 @@ def set_availability():
 @app.route('/user/add_new_skill', methods=['POST'])
 def add_new_skill():
     
-    
     return User().add_new_skill()
 
 @app.route('/user/admin_remove_skill', methods=['POST'])
 def admin_remove_skill():
     
     return User().admin_remove_skill()
+
+
+@app.route('/user/drop_availability', methods=['POST'])
+def drop_availability():
+    
+    return User().drop_availability()
     
     
     

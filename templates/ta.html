@@ -11,8 +11,8 @@
     <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
 </div>
 
-    {{ session['logged_in'] }}
-    {{ session['user'] }}
+    <!--{{ session['logged_in'] }} -->
+    <!--{{ session['user'] }}-->
 
 
     <form name="skills_form">
@@ -27,7 +27,7 @@
         <input type= "submit" value = "Add Skill" class= "btn">
     </form>
 
-    <p>{{ compsci_skills }}</p>
+    <!-- <p>{{ compsci_skills }}</p> -->
 
     
     <form name="remove_skills_form">
@@ -83,7 +83,7 @@
     
 
 
-    <body>
+   <!--- <body>
         <h1>Availability</h1>
         {% if availability %}
     <table id="availability_table">
@@ -108,7 +108,7 @@
     {% else %}
     <p>No availability listed.</p>
     {% endif %}
-    </body>
+    </body> -->
     
 
     
@@ -198,7 +198,7 @@
                 <label for="availability_date">Date:</label>
                 <input type="text" id="manage_availability_date" name="manage_availability_date" readonly>
                 
-                <div id="availability_list"></div>
+                <div name="availability_list" id="availability_list"></div>
                 
             </form>
         </div>

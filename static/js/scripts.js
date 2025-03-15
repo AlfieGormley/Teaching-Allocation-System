@@ -1,4 +1,4 @@
-//Using AJAXs means we can submit form data to the server without the need for a page refresh
+
 
 //Finds the form with name:register_form, when submitted it run this function
 $("form[name='register_form']").submit(function(e) {
@@ -50,6 +50,7 @@ $("form[name='register_form']").submit(function(e) {
 
 
 });
+
 
 //Java Script to handle the login form
 $("form[name='login_form']").submit(function(e) {
@@ -114,9 +115,6 @@ $("form[name='login_form']").submit(function(e) {
 });
 
 
-//Java script for a TA to update their skill set
-
-
 //Finds the form with name:skills_form, when submitted it run this function
 $("form[name='skills_form']").submit(function(e) {
     
@@ -169,7 +167,6 @@ $("form[name='skills_form']").submit(function(e) {
 });
 
 
-
 //Finds the form with name:remove_skills_form, when submitted it run this function
 $("form[name='remove_skills_form']").submit(function(e) {
     
@@ -220,8 +217,6 @@ $("form[name='remove_skills_form']").submit(function(e) {
     });
 
 });
-
-
 
 
 //Finds the form with name:remove_skills_form, when submitted it run this function
@@ -328,8 +323,6 @@ $("form[name='change_password_form']").submit(function(e) {
 });
 
 
-
-
 //Finds the form with name:remove_skills_form, when submitted it run this function
 $("form[name='toggle_mobile_form']").submit(function(e) {
     
@@ -380,7 +373,6 @@ $("form[name='toggle_mobile_form']").submit(function(e) {
     });
 
 });
-
 
 
 //Finds the form with name:register_form, when submitted it run this function
@@ -539,5 +531,46 @@ $("form[name='admin_remove_skill_form']").submit(function(e) {
     });
 
 });
+
+
+//This is used to send the _id of the availability slot we want to drop to the backend
+
+$(document).ready(function() {
+
+    //Event listener for the drop button
+    $(document).on("click", ".drop-button", function(e) {
+
+        e.preventDefault(); // Prevent page from refreshing
+
+        var slot_id = $(this).data("id"); // Get the _id from data attribute
+        //var slot_element = $(this).closest(".availability-slot"); // Find the parent container
+
+        console.log("Removing availability with _id:", slot_id); // Debugging
+
+        $.ajax({
+            url: "/user/drop_availability", 
+            type: "POST",
+            data: { _id: slot_id }, // Send the _id to the backend
+            dataType: "json",
+
+            success: function(resp) {
+
+                console.log(resp);
+
+                $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
+
+
+            },
+
+            error: function(resp) {
+
+                console.log(resp);
+
+            }
+
+        });
+    });
+});
+
 
 

@@ -184,7 +184,7 @@ function showCalendar(month, year) {
 
                 
 
-                //TESTING CODE FOR CALENDAR AVAILABILITY
+                
 
                 // Format full date as YYYY-MM-DD. Note that month is zero-indexed in JS Date, so add 1.
                 let fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
@@ -199,10 +199,7 @@ function showCalendar(month, year) {
                     //cell.setAttribute("title", `Available: ${availabilityMap[fullDate]}`);
                 }
                 
-
-                //TESTING CODE FOR CALENDAR AVAILABILITY
                 
-
                 //This styles the current date differently to the others
 				if (
 					date === today.getDate() &&
@@ -242,7 +239,7 @@ function showCalendar(month, year) {
 		tbl.appendChild(row);
 	}
 
-	//displayReminders();
+	
 }
 
 
@@ -397,13 +394,41 @@ function open_manage_availability_form(date) {
 		filtered_availability.forEach(slot => {
 
 			//Creates a new paragraph element for each availability slot
-            const slot_element = document.createElement("p");
+            const slot_element = document.createElement("div");
+			slot_element.classList.add("availability-slot");
+
+
+			const slot_text = document.createElement("p");
+			slot_text.classList.add("availability-text");
 
 			//The text content inside the slot element
-            slot_element.textContent = `${slot.start_time} - ${slot.end_time}`;
+            slot_text.textContent = `${slot.start_time} - ${slot.end_time}`;
+
+			//Button for dropping the availability
+			const drop_button = document.createElement("button");
+			drop_button.classList.add("drop-button");
+			drop_button.textContent = "Drop Availability";
+
+
+			//Event listener for drop_button
+			drop_button.addEventListener("click", () => {
+
+				//This is logging the correct _id in the console
+				console.log(slot._id)
+
+				//Send _id to the backend
+				//Remove the slot_element from the front end
+
+			})
+
+			drop_button.setAttribute("data-id", slot._id);
+
+			slot_element.appendChild(slot_text);
+			slot_element.appendChild(drop_button);
 
 			//Adds the slot element to availability_list
             availability_list.appendChild(slot_element);
+
         });
 	} else {
 		availability_list.innerHTML = "<p>You have no availability set for this date.</p>";
@@ -417,3 +442,5 @@ function open_manage_availability_form(date) {
 function close_manage_availability_form() {
     document.getElementById("manage_availability_form").style.display = "none";
 }
+
+

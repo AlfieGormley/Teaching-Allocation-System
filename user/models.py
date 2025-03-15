@@ -268,8 +268,18 @@ class User:
         
         return jsonify({"success": f"Skill '{skill}' removed successfully"}), 200
         
+    
+    
+    #This is now working for dropping the availability, still need to make adjustments to the front end...
+    #so that when when the availability is dropped you dont need to refresh the page to see the changes
+    #Another option is to take away the code stopping the page from refreshing, need to look into what the better option is
+    def drop_availability(self):
         
+        availability_id = request.form.get('_id')
         
+        db.availability.delete_one({"_id": availability_id})
+        
+        return jsonify(availability_id, "dropped")
         
         
         
