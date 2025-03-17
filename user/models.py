@@ -285,9 +285,7 @@ class User:
     def add_building(self):
         
         new_building = request.form.get("new_building")
-        floors = request.form.get("floors")
-        print("Data from form:", new_building, floors)
-        
+        floors = int(request.form.get("floors"))
         
         new_building_doc = {
             "_id": uuid.uuid4().hex,
@@ -296,8 +294,6 @@ class User:
         }
         
         db.buildings.insert_one(new_building_doc)
-        
-        
         
         return jsonify(success=True, message="New Building Stored Successfully")
         

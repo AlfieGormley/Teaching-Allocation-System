@@ -37,7 +37,7 @@
                 <input type= "submit" value = "Register" class= "btn">
             
             </form>
-            
+
             <div class = "centre">
                 <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
             </div>
@@ -93,6 +93,21 @@
 
 
                 <input type="submit" value="Add Building" class="btn">
+            </form>
+
+
+            <form name="remove_building_form" method="POST">
+        
+                <label for="remove_building">Select a Building to Remove:</label>
+
+                <select name="building" id="buildings">
+
+                    {% for skill in compsci_skills %}
+                    <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  
+                    {% endfor %}
+                </select>
+            
+                <input type="submit" value="Remove Building" class="btn">
             </form>
 
 
