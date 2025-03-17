@@ -37,7 +37,7 @@
                 <input type= "submit" value = "Register" class= "btn">
             
             </form>
-
+            
             <div class = "centre">
                 <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
             </div>
@@ -84,9 +84,20 @@
             </form>
 
 
+            <form name="add_new_building_form" method="post">
+        
+                <label for="new_building">Add a New Building:</label>
+                <input type= "text" id="new_building" name= "new_building" class="field" placeholder="Enter Building"required>
+                <label for="floors">Enter Number of Floors :</label>
+                <input type="number" id="floors" name="floors" min="1" step="1" required>
 
-    {{ session['logged_in'] }}
-    {{ session['user'] }}
+
+                <input type="submit" value="Add Building" class="btn">
+            </form>
+
+
+
+    
 
 <h1> Admin Interface </h1>
 

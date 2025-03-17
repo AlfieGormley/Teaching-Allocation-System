@@ -72,6 +72,11 @@ def admin_remove_skill():
 def drop_availability():
     
     return User().drop_availability()
+
+@app.route('/user/add_building', methods=['POST'])
+def add_building():
+    
+    return User().add_building()
     
     
     
