@@ -77,6 +77,11 @@ def drop_availability():
 def add_building():
     
     return User().add_building()
+
+@app.route('/user/remove_building', methods=['POST'])
+def remove_building():
+    
+    return User().remove_building()
     
     
     

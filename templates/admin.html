@@ -102,8 +102,8 @@
 
                 <select name="building" id="buildings">
 
-                    {% for skill in compsci_skills %}
-                    <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  
+                    {% for building in buildings %}
+                    <option value="{{ building['_id'] }}">{{ building['name'] }}</option>  
                     {% endfor %}
                 </select>
             

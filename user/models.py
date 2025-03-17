@@ -296,6 +296,15 @@ class User:
         db.buildings.insert_one(new_building_doc)
         
         return jsonify(success=True, message="New Building Stored Successfully")
+    
+    def remove_building(self):
+        
+        building_id = request.form.get("building")
+        print("Building _id:", building_id)
+        
+        db.buildings.delete_one({"_id": building_id})
+        
+        return jsonify(success=True, message="Building Removed from Database Successfully")
         
             
         

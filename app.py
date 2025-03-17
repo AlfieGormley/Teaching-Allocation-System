@@ -96,11 +96,17 @@ def ml():
     #Store results in a dictionary
     compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
     
+    buildings_cursor = db.buildings.find({}, {"_id": 1, "name": 1})
+    
+    buildings = [{"_id": building["_id"], "name": building["name"]} for building in buildings_cursor]
+    
+    
+    
     user_id = session.get('user').get('_id')
     role = session.get('user').get('role')
     
     
-    return render_template('ml.html', role=role, user_id=user_id, compsci_skills=compsci_skills)
+    return render_template('ml.html', role=role, user_id=user_id, compsci_skills=compsci_skills, buildings=buildings)
 
 @app.route('/admin/')
 @login_required(role="Admin")
@@ -112,12 +118,16 @@ def admin():
     #Store results in a dictionary
     compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
     
+    buildings_cursor = db.buildings.find({}, {"_id": 1, "name": 1})
+    
+    buildings = [{"_id": building["_id"], "name": building["name"]} for building in buildings_cursor]
+    
     all_users = db.users.find({}, {"_id": 1, "name": 1})
     user_names = [user['name'] for user in all_users]
     
     
 
-    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills)
+    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings)
 
 @app.route('/unauthorized/')
 def unauthorized():
