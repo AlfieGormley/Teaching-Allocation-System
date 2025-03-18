@@ -95,6 +95,25 @@
                 <label for="endTime">End Time:</label>
                 <input type="time" id="end_time" name="end_time">
 
+                <label for="select_building">Select Building:</label>
+
+                <select name="building" id="buildings">
+
+                    <option value="" disabled selected>Select a Building</option>
+                    {% for building in buildings %}
+                    <option value="{{ building['_id'] }}" data-floors= "{{ building['floors'] }}">{{ building['name'] }}</option>  
+                    {% endfor %}
+
+                </select>
+
+                <label for ="select_floor">Select Floor: </label>
+                <select name = "floor" id = "floors">
+
+                </select>
+
+                <label for="room">Enter Room:</label>
+                <input type="text" id="room" name="room">
+
                 <input type="submit" value="Request Support" class= "btn">
             </form>
         </div>

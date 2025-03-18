@@ -109,7 +109,6 @@ class User:
         else:
             return jsonify({"error": "No updates made to skills"}), 304
         
-        
     
     def remove_skills(self):
         
@@ -145,7 +144,6 @@ class User:
             return jsonify({"error": "User's _id not found in skill's users array"}), 404
     
         return jsonify({"success": f"Skill {skill_name} removed successfully"}), 200
-        
         
     
     def delete_user(self):
@@ -195,7 +193,6 @@ class User:
             
         
         return jsonify({"success": "this worked"}), 200
-    
     
     
     def set_availability(self):

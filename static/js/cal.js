@@ -444,3 +444,19 @@ function close_manage_availability_form() {
 }
 
 
+document.getElementById('buildings').addEventListener('change', function() {
+    const selectedBuilding = this.options[this.selectedIndex];
+    const numberOfFloors = selectedBuilding.getAttribute('data-floors');
+    
+    const floorsDropdown = document.getElementById('floors');
+    floorsDropdown.innerHTML = ''; // Clear previous options
+
+    // Add floor options (e.g., 'G', 1, 2, 3)
+    for (let i = 0; i <= numberOfFloors; i++) {
+        const option = document.createElement('option');
+        option.value = i === 0 ? 'G' : i;  // 'G' for ground floor, otherwise the floor number
+        option.textContent = i === 0 ? 'G' : i;
+        floorsDropdown.appendChild(option);
+    }
+});
+

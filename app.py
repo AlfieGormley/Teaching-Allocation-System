@@ -96,9 +96,9 @@ def ml():
     #Store results in a dictionary
     compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
     
-    buildings_cursor = db.buildings.find({}, {"_id": 1, "name": 1})
+    buildings_cursor = db.buildings.find({}, {"_id": 1, "name": 1, "floors": 1})
     
-    buildings = [{"_id": building["_id"], "name": building["name"]} for building in buildings_cursor]
+    buildings = [{"_id": building["_id"], "name": building["name"], "floors": building["floors"]} for building in buildings_cursor]
     
     
     
