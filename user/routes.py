@@ -51,8 +51,6 @@ def toggle_mobile():
    #return jsonify(success=True, message="Skills updated successfully")
    return User().toggle_mobile()
 
-
-
 @app.route('/user/set_availability', methods=['POST'])
 def set_availability():
     return User().set_availability()
@@ -82,6 +80,13 @@ def add_building():
 def remove_building():
     
     return User().remove_building()
+
+
+
+@app.route('/user/set_travel_time', methods=['POST'])
+def set_travel_time():
+    
+    return User().set_travel_time()
     
     
     

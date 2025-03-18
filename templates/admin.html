@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<h1> Admin Interface </h1>
     <div class = "card-wrapper">
 
         <div class = "card">
@@ -111,10 +113,45 @@
             </form>
 
 
+            
+            <div id="travel_time_modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="close_travel_time_modal()">&times;</span>
+                    <h2>Set Travel Times</h2>
+                    <p>Enter the travel time in minutes between <strong id="new_building_name"></strong> and the existing buildings:</p>
+            
+                    <form id="travel_time_form">
+                        <div id="travel_time_inputs"></div> <!-- Input fields will be dynamically generated here -->
+                        <input type="submit" value="Save Travel Times" class="btn">
+                    </form>
+                </div>
+            </div>
+
+
+
+
 
     
 
-<h1> Admin Interface </h1>
+<h2> Buildings </h2>
+
+
+<div id="buildings-list">
+    <!-- Loop through the buildings and display each one -->
+    {% for building in buildings %}
+        <div class="building" data-id="{{ building._id }}">
+            <h3>{{ building.name }}</h3>
+        </div>
+    {% endfor %}
+</div>
+
+
+
+
+
+<script>
+    var buildings = {{ buildings | tojson }};
+</script>
 
     
 

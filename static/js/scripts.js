@@ -609,22 +609,64 @@ $("form[name='add_new_building_form']").submit(function(e) {
         success: function(resp) {
 
             //Logs the servers response in the console
-            console.log(resp);
-            
+            console.log("Full Response from Server:", resp);
+
+            let new_building = resp.new_building;
+
+            if (!new_building) {
+                console.error("new_building is undefined in response!");
+                return;
+            }
+
+
+            console.log("New Building Name:", new_building.name); // Debugging
+
+            //Setting the building name in the modal
+            $("#new_building_name").text(new_building.name);
+
+            //Populate the travel time form for the new building
+            generate_travel_time_inputs(new_building._id, new_building.name);
+
+
+            //Open the travel time modal
+            $("#travel_time_modal").css("display", "block");
+
+
+            //Success Message
             $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
+
+            
         },
 
         error: function(resp) {
 
             //Logs the error response in the browser console
             console.log(resp);
+            $error.text("Error adding building").removeClass("error--hidden");
 
-            //This will look at our models.py file and return the appropriate error message
-           // $error.text(resp.responseJSON.error).removeClass("error--hidden"); 
         }
     });
 
 });
+
+
+
+function generate_travel_time_inputs(new_building_id, new_building_name) {
+    let inputFields = "";
+
+    // Loop over all existing buildings to generate input fields for each
+    buildings.forEach(building => {
+        inputFields += `
+            <label for="travel_${building._id}">Travel time from ${new_building_name} to ${building.name} (minutes):</label>
+            <input type="number" name="travel_time[${new_building_id}][${building._id}]" min="1" required>
+        `;
+    });
+
+    // Insert the generated input fields into the modal form
+    $("#travel_time_inputs").html(inputFields);
+}
+
+
 
 
 //Finds the form with name:add_new_building_form, when submitted it run this function
@@ -673,6 +715,61 @@ $("form[name='remove_building_form']").submit(function(e) {
 
             //This will look at our models.py file and return the appropriate error message
            // $error.text(resp.responseJSON.error).removeClass("error--hidden"); 
+        }
+    });
+
+});
+
+
+
+
+
+
+
+//Finds the form with name:add_new_building_form, when submitted it run this function
+$("form#travel_time_form").submit(function(e) {
+    
+    //Prevents the page reloading
+    e.preventDefault();
+
+    //Stores the form object
+    var $form = $(this);
+
+    //Finds the error class to display error messages
+    var $error = $form.find(".error");
+
+    //Collects the data submitted from the form to be sent to the server as a POST request
+    var data = $form.serialize();
+
+    //AJAX requests are sent to the backend
+    $.ajax({
+
+        //Sends the request to the route which handles skill updates
+        url: "/user/set_travel_time",
+
+        //POST request
+        type: "POST",
+
+        //Sends the form data
+        data: data,
+
+        //Expecting a json response
+        dataType: "json",
+
+        //If the response is succesfull
+        success: function(resp) {
+
+            //Logs the servers response in the console
+            console.log(resp);
+            
+            $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
+        },
+
+        error: function(resp) {
+
+            //Logs the error response in the browser console
+            console.log(resp);
+            
         }
     });
 

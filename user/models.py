@@ -287,12 +287,14 @@ class User:
         new_building_doc = {
             "_id": uuid.uuid4().hex,
             "name": new_building,
-            "floors": floors
+            "floors": floors,
+            "travel_times": {}
         }
         
         db.buildings.insert_one(new_building_doc)
         
-        return jsonify(success=True, message="New Building Stored Successfully")
+        
+        return jsonify({"success": True, "message": "New Building Stored Successfully", "new_building": new_building_doc})
     
     def remove_building(self):
         
@@ -302,6 +304,53 @@ class User:
         db.buildings.delete_one({"_id": building_id})
         
         return jsonify(success=True, message="Building Removed from Database Successfully")
+    
+    
+    def set_travel_time(self):
+        
+        travel_times = {}
+        
+        for key, value in request.form.items():
+            if key.startswith('travel_time'):
+                # Example key format: travel_time[new_building_name][other_building_id]
+                parts = key.split('][')
+                new_building_id = str(parts[0].split('[')[1])  # Extract new building _id
+                other_building_id = str(parts[1][:-1])  # Extract other building id (remove the last ']')
+                
+                # Store the travel time in the dictionary
+                if new_building_id not in travel_times:
+                    travel_times[new_building_id] = {}
+                    
+                travel_times[new_building_id][other_building_id] = int(value)
+        
+        
+                    
+        form_data = request.form
+        print("Form Data:", form_data)
+        print("Travel Times:", travel_times)
+        print("new_building_id:", new_building_id)
+        
+        travel_times_to_insert = []
+        for new_building_id, times in travel_times.items():
+            for other_building_id, travel_time in times.items():
+                travel_times_to_insert.append({
+                    "_id": uuid.uuid4().hex, 
+                    "building_a": new_building_id,
+                    "building_b": other_building_id,
+                    "travel_time": travel_time
+                })
+                travel_times_to_insert.append({
+                    "_id": uuid.uuid4().hex, 
+                    "building_a": other_building_id,
+                    "building_b": new_building_id,
+                    "travel_time": travel_time
+                })  # Store bidirectional travel times
+
+        if travel_times_to_insert:
+            db.travel_times.insert_many(travel_times_to_insert)
+        
+        
+        return jsonify(success=True, message="Times Updated Successfully")
         
             
         
