@@ -303,6 +303,10 @@ class User:
         
         db.buildings.delete_one({"_id": building_id})
         
+        #Remove all travel times involving the building
+        db.travel_times.delete_many({"$or": [{"building_a": building_id}, {"building_b": building_id}]})
+
+        
         return jsonify(success=True, message="Building Removed from Database Successfully")
     
     
