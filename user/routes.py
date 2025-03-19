@@ -87,6 +87,11 @@ def remove_building():
 def set_travel_time():
     
     return User().set_travel_time()
+
+@app.route('/user/request_support', methods=['POST'])
+def request_support():
+
+    return User().request_support()
     
     
     

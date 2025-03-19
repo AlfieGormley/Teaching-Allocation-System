@@ -75,13 +75,13 @@
             <!-- x button that calls the close_form function -->
             <span class="close" onclick="close_form()">&times;</span>
             <h2>Request Support</h2>
-            <form id="equest_support_form">
+            <form id="request_support_form">
 
                 <label for="availability_date">Date:</label>
                 <input type="text" id="availability_date" name="availability_date" readonly>
 
                 <label for="skills">Required Skills:</label>
-                <select name="skills" id="skills" multiple>
+                <select name="skills[]" id="skills" multiple>
                     {% for skill in compsci_skills %}
                         <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>
                     {% endfor %}
@@ -125,6 +125,8 @@
 
 
 <script src="/static/js/cal.js"></script>
+
+
 
 
 

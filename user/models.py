@@ -303,7 +303,7 @@ class User:
         
         db.buildings.delete_one({"_id": building_id})
         
-        #Remove all travel times involving the building
+        #Remove all travel times involving the building thats getting removed
         db.travel_times.delete_many({"$or": [{"building_a": building_id}, {"building_b": building_id}]})
 
         
@@ -357,8 +357,21 @@ class User:
         return jsonify(success=True, message="Times Updated Successfully")
         
             
+    def request_support(self):
+            
+        date = request.form.get("availability_date")
+        skills = request.form.getlist("skills[]")
+        start_time = request.form.get("start_time")
+        end_time = request.form.get("end_time")
+        building_id = request.form.get("building")
+        floor = request.form.get("floor")
+        room = request.form.get("room")
         
         
+        
+        print("Data from form:", date, skills, start_time, end_time, building_id, floor, room)
+        
+        return jsonify(success=True, message="Form Data sent successfully")
         
         
         
