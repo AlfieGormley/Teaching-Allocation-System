@@ -295,3 +295,18 @@ body {
 .drop-button:hover {
     background-color: #e60000; /* Darker red on hover */
 }
+
+
+
+/* FOR ADMIN SHIFT APPROVAL BOX */
+
+.shift-container {
+	max-height: 500px; /* Adjust this height as needed */
+	overflow-y: scroll;
+	border: 1px solid #ccc;
+	padding: 10px;
+	margin-bottom: 20px;
+}
+.shift-item {
+	margin: 10px 0;
+}

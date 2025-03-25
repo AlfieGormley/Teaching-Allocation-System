@@ -635,10 +635,7 @@ class User:
 
             print("Running Operation Mode 2")
             
-            #Store this in shifts collection 
-            #Admin receives shifts with pending status
-            #Status set to approved
-            #ta_id is assigned to best_ta and status set = completed
+            #Create shift document for admin approval
             shift_doc = {
                 "_id": uuid.uuid4().hex,
                 "ta_id": "Not Yet Assigned",
@@ -653,7 +650,7 @@ class User:
                 "skills": skills,
                 "operation_mode": operation_mode,
                 "time_stamp": datetime.now(),
-                "status": "pending"  #Could be: "pending", "approved", "rejected", "assigned", "completed"
+                "status": "pending"  #Could be: "pending", "approved", "rejected", "completed"
             }
             
             #Store the document in the shifts collection

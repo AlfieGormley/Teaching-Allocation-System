@@ -160,6 +160,34 @@
 </div>
 
 
+<h1>Pending Shifts</h1>
+
+    {% if pending_shifts %}
+        <!-- Shift Container -->
+        <form name="admin_approval_form"  method="POST">
+            <div class="shift-container">
+                {% for shift in pending_shifts %}
+                    <div class="shift-item">
+                        <input type="checkbox" name="shift_ids" value="{{ shift._id }}">
+                        <strong>Module Leader:</strong> {{ shift.ml_name }} | 
+                        <strong>Date:</strong> {{ shift.date }} |
+                        <strong>Start Time:</strong> {{ shift.start_time.strftime('%H:%M') }} |
+                        <strong>End Time:</strong> {{ shift.end_time.strftime('%H:%M') }} |
+                        <strong>Building:</strong> {{ shift.building_name }} |
+                        <strong>Room:</strong> {{ shift.room_name }} |
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Buttons to approve or deny -->
+            <button type="submit" name="approve" value="approve">Approve Selected</button>
+            <button type="submit" name="deny" value="deny">Deny Selected</button>
+        </form>
+    {% else %}
+        <p>No pending shifts.</p>
+    {% endif %}
+
+
 
 
 

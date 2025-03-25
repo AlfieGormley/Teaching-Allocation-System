@@ -112,6 +112,38 @@ def ml():
 @login_required(role="Admin")
 def admin():
     
+    #Query shifts collection for pending shifts
+    pending_shift_docs = db.shifts.find({"status": "pending"})
+    
+    pending_shifts = []
+    
+    for shift in pending_shift_docs:
+        
+        #Look up the module leader
+        ml_data = db.users.find_one({"_id": shift["ml_id"]})
+        
+        #Extract ML name
+        ml_name = ml_data["name"]
+        
+        #Look up the building
+        building_data = db.buildings.find_one({"_id": shift["building"]})
+        
+        #Look up Building name
+        building_name = building_data["name"]
+        
+        shift_data = {
+            "shift_id": shift["_id"],
+            "ml_name": ml_name,
+            "date": shift["date"],
+            "start_time": shift["start_time"],
+            "end_time": shift["end_time"],
+            "building_name": building_name,
+            "room_name": shift["room"],
+        }
+        
+        pending_shifts.append(shift_data)
+        
+    
     #find the _id and name of each skill inside the collection
     compsci_skill_cursor =  db.compsci_skills.find({}, {"_id": 1, "name": 1})
     
@@ -123,11 +155,12 @@ def admin():
     buildings = [{"_id": building["_id"], "name": building["name"]} for building in buildings_cursor]
     
     all_users = db.users.find({}, {"_id": 1, "name": 1})
+    
     user_names = [user['name'] for user in all_users]
     
     
 
-    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings)
+    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings, pending_shifts=pending_shifts)
 
 @app.route('/unauthorized/')
 def unauthorized():
