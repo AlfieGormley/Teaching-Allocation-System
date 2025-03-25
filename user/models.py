@@ -565,15 +565,14 @@ class User:
         #Collect the currently active operation mode document
         active_mode_doc = db.operation_mode.find_one({"active": True})
         
-        #Assign the operation mode
-        
+        #Assign operation mode
         operation_mode = int(active_mode_doc["operation_mode"])
         
         #Extract data from the request form
         requested_date, skills, start_time, end_time, building_id, floor, room, description = User.exctract_request_form(self)
         
-
-        #Modes with Varied logic for determining the most suitable TA
+        start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
+        
         
         #If room is on the ground floor:
         if floor == "G":
@@ -600,12 +599,14 @@ class User:
             
             #Select the TA with the lowest uniqueness score
             best_ta = sorted_tas[0][0] if sorted_tas else None
+            
+            
 
             
             #Get TAs who have the desired skill set with mobility issues
             return print("Disabled Candidates:", ta_candidates)
             
-        #Mode to randomise TA selection out of the available TAs matching the skill set
+        #Mode to randomise TA selection out of the available TAs matching the skill set 
         elif operation_mode == 1:
             print("Running Operation Mode 1")
             
@@ -613,7 +614,7 @@ class User:
             ta_candidates = User().get_ta_candiates(skills)
             
             #Convert start and end time to ISODate format and localise with timezone
-            start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
+            #start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
             
             #Collect ta_candidates with matching availablility
             available_tas = list(User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso))
@@ -631,14 +632,38 @@ class User:
             
         #Mode in which admin grants approval pre TA allocation
         elif operation_mode == 2:
-            
+
             print("Running Operation Mode 2")
             
+            #Store this in shifts collection 
+            #Admin receives shifts with pending status
+            #Status set to approved
+            #ta_id is assigned to best_ta and status set = completed
+            shift_doc = {
+                "_id": uuid.uuid4().hex,
+                "ta_id": "Not Yet Assigned",
+                "ml_id": ml_id,
+                "date": requested_date,
+                "start_time": start_time_iso,
+                "end_time": end_time_iso,
+                "room": room,
+                "building": building_id,
+                "floor": floor,
+                "description": description,
+                "skills": skills,
+                "operation_mode": operation_mode,
+                "time_stamp": datetime.now(),
+                "status": "pending"  #Could be: "pending", "approved", "rejected", "assigned", "completed"
+            }
+            
+            #Store the document in the shifts collection
+            db.shifts.insert_one(shift_doc)
             
             
             
             
-        
+            
+            
         #Mode in which admin can select candidate based on a specific quota (TA information will have to be displayed)
         elif operation_mode == 3:
             
@@ -654,7 +679,7 @@ class User:
             ta_candidates = User().get_ta_candiates(skills)
             
             #Convert start and end time to ISODate format and localise with timezone
-            start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
+            #start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
             
             #Collect ta_candidates with matching availablility
             available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
@@ -696,8 +721,13 @@ class User:
                 "floor": floor,
                 "description": description,
                 "skills": skills,
-                "Pending": True
+                "status": "pending"  #Could be: "pending", "approved", "rejected", "assigned", "completed"
             }
+        
+        #Automatic mode, no Admin approval needed
+        elif operation_mode == 5:
+            
+            print("Running Operation Mode 5")
 
 
         #print("User List for each skill:", user_sets)
