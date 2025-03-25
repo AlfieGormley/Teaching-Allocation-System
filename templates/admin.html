@@ -160,7 +160,7 @@
 </div>
 
 
-<h1>Pending Shifts</h1>
+<h2>Pending Shifts Awaiting Admin Approval</h2>
 
     {% if pending_shifts %}
         <!-- Shift Container -->
@@ -168,7 +168,7 @@
             <div class="shift-container">
                 {% for shift in pending_shifts %}
                     <div class="shift-item">
-                        <input type="checkbox" name="shift_ids" value="{{ shift._id }}">
+                        <input type="checkbox" name="shift_ids" value="{{ shift.shift_id }}">
                         <strong>Module Leader:</strong> {{ shift.ml_name }} | 
                         <strong>Date:</strong> {{ shift.date }} |
                         <strong>Start Time:</strong> {{ shift.start_time.strftime('%H:%M') }} |
@@ -180,8 +180,8 @@
             </div>
             
             <!-- Buttons to approve or deny -->
-            <button type="submit" name="approve" value="approve">Approve Selected</button>
-            <button type="submit" name="deny" value="deny">Deny Selected</button>
+            <button type="submit" name="action" value="approve">Approve Selected</button>
+            <button type="submit" name="action" value="deny">Deny Selected</button>
         </form>
     {% else %}
         <p>No pending shifts.</p>

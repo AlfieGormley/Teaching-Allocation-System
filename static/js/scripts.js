@@ -877,3 +877,50 @@ $("form[name='set_mode_form']").submit(function(e) {
     });
 
 });
+
+
+
+//For admin_approval_form
+$(document).ready(function () {
+
+    //Variable for storing the action (approve/deny)
+    let action = ""; 
+
+    //Capture clicked button
+    $("button[name='action']").click(function () {
+        //Store button value
+        action = $(this).val(); 
+    });
+
+    $("form[name='admin_approval_form']").submit(function (e) {
+
+        //Prevent page from reloading
+        e.preventDefault(); 
+
+        var $form = $(this);
+        var $error = $form.find(".error");
+
+        // Serialize form data as an array
+        var data = $form.serializeArray();
+
+        //Add action to form data
+        data.push({ name: "action", value: action });
+
+        console.log("Sending Data:", data); // Debugging
+
+        // AJAX request
+        $.ajax({
+            url: "/user/manage_pending_shift",
+            type: "POST",
+            data: data, 
+            dataType: "json",
+            success: function (resp) {
+                console.log(resp);
+                $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
+            },
+            error: function (resp) {
+                console.log(resp);
+            }
+        });
+    });
+});

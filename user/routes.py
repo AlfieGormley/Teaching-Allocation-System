@@ -95,12 +95,20 @@ def request_support():
 @app.route('/user/set_mode', methods=['POST'])
 def set_operation_mode():
     
-    #operation_mode = request.form.get("operation_mode")
-    #print("Operation Mode:", operation_mode)
-
-    #return jsonify(success=True, message="Form Data Sent Successfully")
-
     return User.set_operation_mode()
+
+@app.route('/user/manage_pending_shift', methods=['POST'])
+def manage_pending_shift():
+    
+    form_data = request.form
+    print("Data from form:", form_data)
+    
+    action = request.form.get("action")
+    
+    print("Action:", action)
+
+    
+    return jsonify(success=True, message="Form Data Sent Successfully")
     
     
     
