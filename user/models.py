@@ -562,8 +562,12 @@ class User:
         #Collect Module Leader _id from the sessio
         ml_id = session.get('user').get('_id')
         
-        #This will be toggled by the admin
-        operation_mode = 1
+        #Collect the currently active operation mode document
+        active_mode_doc = db.operation_mode.find_one({"active": True})
+        
+        #Assign the operation mode
+        
+        operation_mode = int(active_mode_doc["operation_mode"])
         
         #Extract data from the request form
         requested_date, skills, start_time, end_time, building_id, floor, room, description = User.exctract_request_form(self)
@@ -627,16 +631,23 @@ class User:
             
         #Mode in which admin grants approval pre TA allocation
         elif operation_mode == 2:
-            print("Running Opertion Mode 2")
+            
+            print("Running Operation Mode 2")
+            
+            
+            
+            
             
         
         #Mode in which admin can select candidate based on a specific quota (TA information will have to be displayed)
         elif operation_mode == 3:
-            print("Running Opertion Mode 3") 
+            
+            print("Running Operation Mode 3") 
         
         
         #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
         elif operation_mode == 4:
+            print("Running Operation Mode 4")
             print("Searching for TAs With Suitable Availability and skill set")
             
             #Get TAs who have the desired skill set
@@ -692,17 +703,18 @@ class User:
         #print("User List for each skill:", user_sets)
         #print("Users who have all the skills:", ta_candidates)
         #print("TA availability docs:", ta_availability_docs)
-        print("Available TAs with matching skill set and availability:", available_tas)
-        print("All skill docs:", all_skill_docs)
+        #print("Available TAs with matching skill set and availability:", available_tas)
+        #print("All skill docs:", all_skill_docs)
         #print("Skill Counts:", skill_counts)
-        print("Skill Rarity:", skill_rarity)
+        #print("Skill Rarity:", skill_rarity)
         
-        print("Sorted TAs:", sorted_tas)
-        print("Most Suitable TA:", best_ta)
-        print("Module Leader _id:", ml_id)
-        print("Shift Doc:", shift_doc)
+        #print("Sorted TAs:", sorted_tas)
+        #print("Most Suitable TA:", best_ta)
+        #print("Module Leader _id:", ml_id)
+        #print("Shift Doc:", shift_doc)
         
-        return jsonify(success=True, message="Form Data sent successfully")
+        return jsonify (operation_mode)
+        return jsonify(success=True, message="Form Data sent successfully HELLLO")
     
     
         
