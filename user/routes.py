@@ -82,7 +82,6 @@ def remove_building():
     return User().remove_building()
 
 
-
 @app.route('/user/set_travel_time', methods=['POST'])
 def set_travel_time():
     
@@ -92,6 +91,16 @@ def set_travel_time():
 def request_support():
 
     return User().request_support()
+
+@app.route('/user/set_mode', methods=['POST'])
+def set_operation_mode():
+    
+    #operation_mode = request.form.get("operation_mode")
+    #print("Operation Mode:", operation_mode)
+
+    #return jsonify(success=True, message="Form Data Sent Successfully")
+
+    return User.set_operation_mode()
     
     
     

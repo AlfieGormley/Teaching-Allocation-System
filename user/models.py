@@ -3,6 +3,9 @@ from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
 from datetime import datetime
+import pytz
+from collections import defaultdict
+import random
 
 class User:
 
@@ -225,7 +228,7 @@ class User:
         
         return jsonify(success=True, message="Avaiability Updated")
     
-    
+
     def add_new_skill(self):
         new_skill = request.form.get('new_skill')
     
@@ -356,28 +359,361 @@ class User:
         
         return jsonify(success=True, message="Times Updated Successfully")
         
+    #Get TAs who have the desired skill set
+    def get_ta_candiates(self, skills):
+        
+        #Collect the appropriate skill documents
+            skill_docs = list(db.compsci_skills.find({"_id": {"$in": skills}}))
             
-    def request_support(self):
+            #Extract the user list for each skill
+            user_sets = [set(skill["users"]) for skill in skill_docs]
             
-        date = request.form.get("availability_date")
+            #Collect users who appear in all lists.
+            return set.intersection(*user_sets) if user_sets else set()
+    
+    #Gets TAs with mobility issues matching the desired skill set
+    def get_disabled_ta_candidates(self, skills):
+        
+        #Collect the appropriate skill documents
+            skill_docs = list(db.compsci_skills.find({"_id": {"$in": skills}}))
+            
+            #Extract the user list for each skill
+            user_sets = [set(skill["users"]) for skill in skill_docs]
+            
+            #Collect users who appear in all lists.
+            ta_candidates = set.intersection(*user_sets) if user_sets else set()
+            
+            #Filter for TAs who have mobility issues
+            disabled_candidates = {
+                ta for ta in ta_candidates 
+                if db.users.find_one({"_id": ta, "mobility_issue": True})
+            }
+            
+            return disabled_candidates
+            
+    #Convert date to ISODate Format and Localise with the timezone
+    def convert_to_iso(self, requested_date, start_time, end_time):
+        
+        #Set timezone
+        timezone = pytz.timezone("UTC")
+        
+        #Convert to ISODate Format
+        start_time_iso = datetime.strptime(f"{requested_date} {start_time}", "%Y-%m-%d %H:%M")
+        end_time_iso = datetime.strptime(f"{requested_date} {end_time}", "%Y-%m-%d %H:%M")
+        
+        #Localise with the time zone
+        start_time_iso = timezone.localize(start_time_iso)
+        end_time_iso = timezone.localize(end_time_iso)
+        
+        return start_time_iso, end_time_iso
+    
+    #Collect available TAs from a set of candidates
+    def get_available_tas(self, ta_candidates, start_time_iso, end_time_iso):
+        
+        #Set to store TAs with matching availability
+        available_tas = set()
+        
+        #Collect the relevent availability docs
+        ta_availability_docs = list(db.availability.find({
+                "user_id": {"$in": list(ta_candidates)},
+                "start_time": {"$lte": start_time_iso},
+                "end_time": {"$gte": end_time_iso}
+            }))
+        
+        #Extract the user_id from the availability docs and add to available_tas
+        for doc in ta_availability_docs:
+            available_tas.add(doc["user_id"])
+        
+        return available_tas
+    
+    #Returns the rarity of each skill in a ranking system
+    def skill_rankings(self):
+        
+        #Collects all skill documents
+        all_skill_docs = list(db.compsci_skills.find({}))
+        
+        #Count the number of users for each skill
+        skill_counts = {skill["_id"]: len(skill["users"]) for skill in all_skill_docs}
+            
+        #Calculate the rarity of each skill (Higher rarity = more unique skill)
+        skill_rarity = {skill_id: 1 / count if count > 0 else 1 for skill_id, count in skill_counts.items()}
+        
+        return skill_rarity, all_skill_docs
+    
+    #Will rank and sort TAs according to skill_rarity
+    def ta_scores(self, available_tas, all_skill_docs, skill_rarity):
+        
+        #Default Dictonary for storing TAs uniquness score
+        ta_scores = defaultdict(float)
+            
+        #Iterate over each ta who is available and has the matching skill set
+        for user_id in available_tas:
+            #Loops through all skills stored in compsci_skills
+            for skill in all_skill_docs:
+                #If the current TA appears in the user list for that skill
+                if user_id in skill["users"]:
+                    #Add the rarity score for this skill to the TAs uniqueness score
+                    ta_scores[user_id] += skill_rarity[skill["_id"]]
+        
+        return sorted(ta_scores.items(), key=lambda x: x[1])
+    
+    
+    
+    #Removes available TAs whose schedule doesnt allow time to commute
+        #THOUGHTS NEED TO CHECK IF IN SAME BUILDING, need to know the structure of the shifts collection
+        #Consider for diabled TAs if they do need to commute we need to adjust their commute times
+    def filter_available_tas(self, floor, start_time, available_tas):
+        
+        #This variable needs to be thought about slightly more:
+        #floor_travel_time = 20 seconds
+        
+        #Iterate through available_tas "user_id"
+            #Collect shift_records on the same date
+                #if len(shift_records) == 0:
+
+                    #return ("No TAs Removed")
+                
+                #commute = (sheduled_floor + floor) * floor_travel_time
+                
+                #Assess each shift record to esnure it doesnt prevent the tas availability
+                    #Result = (scheduled_end_time + commute) < start_time
+                        
+                    
+        
+        
+        return
+    
+    def exctract_request_form(self):
+        
+        #Need to send this data to admin.html along with the most suitable TA
+        requested_date = request.form.get("availability_date") 
         skills = request.form.getlist("skills[]")
-        start_time = request.form.get("start_time")
+        start_time = request.form.get("start_time") 
         end_time = request.form.get("end_time")
-        building_id = request.form.get("building")
+        building_id = request.form.get("building") 
         floor = request.form.get("floor")
         room = request.form.get("room")
+        description = request.form.get("description")
+        
+        return requested_date, skills, start_time, end_time, building_id, floor, room, description
+    
+    def set_operation_mode():
+        
+        operation_mode = request.form.get("operation_mode")
+        print("Operation Mode:", operation_mode)
+        
+        #(0) If collection is empty/doesnt exists
+        if db.operation_mode.count_documents({}) == 0:
+            
+            #Create mode directly
+            db.operation_mode.insert_one({
+                "_id": uuid.uuid4().hex,
+                "operation_mode": operation_mode,
+                "active": True
+            })
+            return jsonify(success=True, message=f"Operation mode {operation_mode} is now active")
+
+        
+        #(1): Set currently active operation mode to False
+        db.operation_mode.update_one(
+            {"active": True},  # Find the currently active mode
+            {"$set": {"active": False}}  # Set it to inactive
+        )
+        
+        #(2) Check if operation_mode exists in the collection
+        existing_mode = db.operation_mode.find_one({"operation_mode": operation_mode})
+        
+        #If operation_mode exists
+        if existing_mode:
+            #Update to mode active
+            db.operation_mode.update_one(
+                {"operation_mode": operation_mode},
+                {"$set": {"active": True}}
+            )
+            
+        #If it doesn’t exist
+        else: 
+            #Create mode document
+            db.operation_mode.insert_one({
+                "_id": uuid.uuid4().hex,
+                "operation_mode": operation_mode,
+                "active": True
+            })
+        
+
+        return jsonify(success=True, message=f"Operation mode {operation_mode} is now active")
+    
+    
+    #NOTES ON THE ALGORITHM:
+    
+    #(1) - After Admin approval variable changes effect pending requests results
+    
+    #(2) - Consider Maxmium/Minumum Work Quotas
+    
+    #(3) - Consider no TA's matching requirements
+    
+    #(4) - If no TAs available: 
+    #           Store list of close candidates who could be considered if the quota isnt matched
+    
+    #(5) - Maybe on ML form, if no available_tas, what degree of lateness would be acceptable?
+    
+    def request_support(self):
+        
+        #Collect Module Leader _id from the sessio
+        ml_id = session.get('user').get('_id')
+        
+        #This will be toggled by the admin
+        operation_mode = 1
+        
+        #Extract data from the request form
+        requested_date, skills, start_time, end_time, building_id, floor, room, description = User.exctract_request_form(self)
+        
+
+        #Modes with Varied logic for determining the most suitable TA
+        
+        #If room is on the ground floor:
+        if floor == "G":
+            print("Searching for Disbaled TAs With Suitable Availability")
+            
+            #Collect TAs with mobility issues matching the desired skill set
+            ta_candidates = User.get_disabled_ta_candidates(self, skills)
+            
+            #Convert start and end time to ISODate format and localise with timezone
+            start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
+            
+            #Collect the ta_candidates with matching availablility
+            available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
+            
+            #Remove TAS who CAN'T from available_tas
+            #Remove TAS who CAN'T from available_tas
+            #Remove TAS who CAN'T from available_tas
+                
+            #Collect all the skill documents and calculate their rarity
+            skill_rarity, all_skill_docs = User.skill_rankings(self)
+            
+            #Sorts the available TAs according to skill_rarity, first in list = lowest uniquness
+            sorted_tas = User.ta_scores(self, available_tas, all_skill_docs, skill_rarity)
+            
+            #Select the TA with the lowest uniqueness score
+            best_ta = sorted_tas[0][0] if sorted_tas else None
+
+            
+            #Get TAs who have the desired skill set with mobility issues
+            return print("Disabled Candidates:", ta_candidates)
+            
+        #Mode to randomise TA selection out of the available TAs matching the skill set
+        elif operation_mode == 1:
+            print("Running Operation Mode 1")
+            
+            #Get TAs who have the desired skill set
+            ta_candidates = User().get_ta_candiates(skills)
+            
+            #Convert start and end time to ISODate format and localise with timezone
+            start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
+            
+            #Collect ta_candidates with matching availablility
+            available_tas = list(User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso))
+            
+            #Remove TAS who CAN'T from available_tas
+            #Remove TAS who CAN'T from available_tas
+            #Remove TAS who CAN'T from available_tas
+            
+            #Randomly select a candidate
+            best_ta = random.choice(list(available_tas))
+            
+            print("Randomly selected TA candidate:", best_ta)
+            
+            
+            
+        #Mode in which admin grants approval pre TA allocation
+        elif operation_mode == 2:
+            print("Running Opertion Mode 2")
+            
+        
+        #Mode in which admin can select candidate based on a specific quota (TA information will have to be displayed)
+        elif operation_mode == 3:
+            print("Running Opertion Mode 3") 
         
         
+        #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
+        elif operation_mode == 4:
+            print("Searching for TAs With Suitable Availability and skill set")
+            
+            #Get TAs who have the desired skill set
+            ta_candidates = User().get_ta_candiates(skills)
+            
+            #Convert start and end time to ISODate format and localise with timezone
+            start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
+            
+            #Collect ta_candidates with matching availablility
+            available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
+            
+            
+            #Out of available_tas who can make it factoring commute time
+            #(We essentially need to check if the end-time of their last shift + commute time <= start_time of this shift)
+            #For every user_id in available_tas
+                #Search Shifts where 
+                    #date = requested_date
+                    #pending = FALSE
+                    
+                    
+            #Remove TAS who CAN'T from available_tas
         
-        print("Data from form:", date, skills, start_time, end_time, building_id, floor, room)
+                
+            #Collect all the skill documents and calculate their rarity
+            skill_rarity, all_skill_docs = User.skill_rankings(self)
+            
+            #Sorts the available TAs according to skill_rarity, first in list = lowest uniquness
+            sorted_tas = User.ta_scores(self, available_tas, all_skill_docs, skill_rarity)
+            
+            #Select the TA with the lowest uniqueness score
+            best_ta = sorted_tas[0][0] if sorted_tas else None
+            
+            
+            #This document needs to be stored in the shifts collection all docs with a pending status
+            #All docs with a pending status send to admin pannel 
+            
+            shift_doc = {
+                "_id": uuid.uuid4().hex,
+                "ta_id": best_ta,
+                "ml_id": ml_id,
+                "date": requested_date,
+                "start_time": start_time_iso,
+                "end_time": end_time_iso,
+                "room": room,
+                "building": building_id,
+                "floor": floor,
+                "description": description,
+                "skills": skills,
+                "Pending": True
+            }
+
+
+        #print("User List for each skill:", user_sets)
+        #print("Users who have all the skills:", ta_candidates)
+        #print("TA availability docs:", ta_availability_docs)
+        print("Available TAs with matching skill set and availability:", available_tas)
+        print("All skill docs:", all_skill_docs)
+        #print("Skill Counts:", skill_counts)
+        print("Skill Rarity:", skill_rarity)
+        
+        print("Sorted TAs:", sorted_tas)
+        print("Most Suitable TA:", best_ta)
+        print("Module Leader _id:", ml_id)
+        print("Shift Doc:", shift_doc)
         
         return jsonify(success=True, message="Form Data sent successfully")
+    
+    
+        
         
         
         
     
-   
         
+
+    
+
         
         
         
