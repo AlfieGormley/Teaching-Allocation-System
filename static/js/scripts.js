@@ -903,6 +903,7 @@ $(document).ready(function () {
         // Serialize form data as an array
         var data = $form.serializeArray();
 
+
         //Add action to form data
         data.push({ name: "action", value: action });
 

@@ -1,8 +1,10 @@
+from typing import Self
 from flask import Flask, jsonify, request, session, redirect
 from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
 from datetime import datetime
+from datetime import timedelta
 import pytz
 from collections import defaultdict
 import random
@@ -312,7 +314,6 @@ class User:
         
         return jsonify(success=True, message="Building Removed from Database Successfully")
     
-    
     def set_travel_time(self):
         
         travel_times = {}
@@ -458,14 +459,149 @@ class User:
         return sorted(ta_scores.items(), key=lambda x: x[1])
     
     
-    
-    #Removes available TAs whose schedule doesnt allow time to commute
-        #THOUGHTS NEED TO CHECK IF IN SAME BUILDING, need to know the structure of the shifts collection
-        #Consider for diabled TAs if they do need to commute we need to adjust their commute times
-    def filter_available_tas(self, floor, start_time, available_tas):
+    #Calculates the commute time between "approved" and "pending" shift
+    def calculate_commute_time(self, scheduled_building, building, scheduled_floor, floor):
         
-        #This variable needs to be thought about slightly more:
-        #floor_travel_time = 20 seconds
+        #Floor travel time in seconds
+        #THINK ABOUT MORE:
+        floor_travel_time = 0.5 #(30 seconds per floor)
+        
+        #Convert floor to integer
+        floor = int(floor)
+        
+        #Check if buildings are different
+        if scheduled_building != building:
+            print("Calculating Commute Time!")
+                    
+            #Collect travel time record between buildings
+            travel_time_record = db.travel_times.find_one(
+                {"building_a": scheduled_building, "building_b": building}
+            )
+
+            #Extract travel_time from record
+            travel_time = travel_time_record["travel_time"]
+                    
+            print("Travel Time: ", travel_time) #Debugging
+            
+            #Calculate Floor Commute Time
+            floor_commute = (scheduled_floor + floor) * floor_travel_time
+                    
+            #Calculate Commute time
+            commute_time = floor_commute + travel_time
+            
+            return commute_time
+            
+            
+        #Condition triggered when shifts occur in the same building
+        else:
+            
+            print("Calculating Commute Time Between Floors")
+            
+            #Store commute time between floors
+            commute_time = abs(scheduled_floor - floor) * floor_travel_time
+            
+            return commute_time
+        
+        
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    #CURRENT THING TO WORK ON - CURRENT THING TO WORK ON - CURRENT THING TO WORK ON - CURRENT THING TO WORK ON
+    
+    #Returns eligible TAs whose schedule allows time to commute  
+    def filter_available_tas(self, floor, start_time, available_tas, date, building):
+        
+        #List to store eligible_tas
+        eligible_tas = []
+        
+        #Loop through each available TA
+        for ta in available_tas:
+            
+            #Collect shift records for this TA on the same date
+            shift_records = list(db.shifts.find({"ta_id": ta, "date": date, "status": "approved"}))
+            
+            
+            #No shifts -> TA is available
+            if not shift_records:
+                eligible_tas.append(ta)
+                continue  # No need to check further
+            
+            
+            # Check if any scheduled shift prevents TA from taking the new one
+            available = True
+            for shift in shift_records:
+                
+                print("Shift:", shift) #Debugging
+                
+                #Extract shift data for calculate_commute_time()
+                scheduled_floor = int(shift["floor"])
+                scheduled_building = shift["building"]
+                
+                #Extract end time of "approved" shift
+                scheduled_end_time = shift["end_time"]
+                
+                #Calculate Commute Time
+                commute_time = User.calculate_commute_time(Self, scheduled_building, building, scheduled_floor, floor)
+                print("Commute Time:", commute_time) #Debugging
+                
+                #Assess each shift record to esnure it doesnt prevent the tas availability
+                
+                
+                # Convert commute_time to timedelta
+                commute_duration = timedelta(seconds=commute_time)
+                
+                #If the TA can make it factoring commute time
+                if scheduled_end_time + commute_duration <= start_time:
+                    print("TA can make the shift")
+                
+                #If the TA can't make it factoring commute time
+                else:
+                    print("TA can't make the shift")
+                    #Make available false which means ta wont be eligible
+                    available = False
+
+            #If TA eligible add to list
+            if available == True:
+                eligible_tas.append(ta) 
+            else:
+                continue
+                    
+        return eligible_tas
+                    
+            
+
         
         #Iterate through available_tas "user_id"
             #Collect shift_records on the same date
@@ -481,7 +617,7 @@ class User:
                     
         
         
-        return
+        
     
     def exctract_request_form(self):
         
@@ -657,10 +793,6 @@ class User:
             db.shifts.insert_one(shift_doc)
             
             
-            
-            
-            
-            
         #Mode in which admin can select candidate based on a specific quota (TA information will have to be displayed)
         elif operation_mode == 3:
             
@@ -674,9 +806,6 @@ class User:
             
             #Get TAs who have the desired skill set
             ta_candidates = User().get_ta_candiates(skills)
-            
-            #Convert start and end time to ISODate format and localise with timezone
-            #start_time_iso , end_time_iso = User.convert_to_iso(self, requested_date, start_time, end_time)
             
             #Collect ta_candidates with matching availablility
             available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
@@ -745,8 +874,74 @@ class User:
     
     
         
+    def manage_pending_shift():
+        
+        #Collect action "approve/deny"
+        action = request.form.get("action")
+        print("Action:", action) #Debugging
+        
+        #Collect shift_ids
+        shift_ids = request.form.getlist("shift_ids")
+        print("Shift_ids:", shift_ids) #Debugging
         
         
+        shift_docs = list(db.shifts.find({"_id": {"$in": [shift_id for shift_id in shift_ids]}}))
+        
+        for shift_doc in shift_docs:
+            print("Processing shift:", shift_doc)
+            
+            shift_info = {
+                "shift_id": shift_doc["_id"],  
+                "ta_id": shift_doc["ta_id"],
+                "module_leader_id": shift_doc["ml_id"],
+                "date": shift_doc["date"],
+                "start_time": shift_doc["start_time"], 
+                "end_time": shift_doc["end_time"],
+                "room": shift_doc["room"],
+                "building_id": shift_doc["building"],
+                "floor": shift_doc["floor"],
+                "description": shift_doc["description"],
+                "skills": shift_doc["skills"], 
+                "operation_mode": shift_doc["operation_mode"],
+                "timestamp": shift_doc["time_stamp"].strftime("%Y-%m-%d %H:%M:%S"),  
+                "status": shift_doc["status"],
+            }
+            
+            if action == "approve":
+                
+                #Get TAs who have the desired skill set
+                ta_candidates = User().get_ta_candiates(shift_info["skills"])
+                print("TA Candidates:", ta_candidates)
+                
+                #Collect ta_candidates with matching availablility
+                available_tas = User.get_available_tas(Self, ta_candidates, shift_info["start_time"], shift_info["end_time"])
+                print("Available TAs:", available_tas)
+                
+                
+                #NEED TO WORK ON THIS FUNCTION BEFORE I CAN PROGRESS
+                #Out of these TAs who can make it factoring commute time    
+                eligible_tas = User.filter_available_tas(Self, shift_info["floor"], shift_info["start_time"], available_tas, shift_info["date"], shift_info["building_id"])
+                
+                #Call skill_rankings()
+                
+                #Call ta_scores(self, available_tas, all_skill_docs, skill_rarity)
+                
+                #Set ta_id in shift document to best_ta
+                
+                #Set shift status to approved
+                
+                print("Eligble TAs:", eligible_tas)
+                
+            elif action == "deny":
+                print("Rejecting Request")
+            
+            
+            
+            #shift_data.append(shift_info)
+        
+        
+        return jsonify("Form Data Recived:", action)
+            
         
     
         
