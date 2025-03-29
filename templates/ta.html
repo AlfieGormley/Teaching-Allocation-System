@@ -3,17 +3,11 @@
 {% block content %}
 
 
-
-
 <h1> Teaching Associate  </h1>
 
 <div class = "centre">
     <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
 </div>
-
-    <!--{{ session['logged_in'] }} -->
-    <!--{{ session['user'] }}-->
-
 
     <form name="skills_form">
         <label for="skills">Select a Skill to Add:</label>
@@ -26,8 +20,6 @@
         </select>
         <input type= "submit" value = "Add Skill" class= "btn">
     </form>
-
-    <!-- <p>{{ compsci_skills }}</p> -->
 
     
     <form name="remove_skills_form">
@@ -42,11 +34,6 @@
     </form>
 
 
-    
-
-
-
-   
     <form name="change_password_form" method="post">
         
         <label for="new_password">New Password:</label>
@@ -80,39 +67,6 @@
         {% endif %}
     </body>
 
-    
-
-
-   <!--- <body>
-        <h1>Availability</h1>
-        {% if availability %}
-    <table id="availability_table">
-        <tr>
-            <th>Start Date</th>
-            <th>Start Time</th>
-            <th>End Date</th>
-            <th>End Time</th>
-        </tr>
-        {% for slot in availability %}
-        <tr data-id= "{{ slot['_id'] }}">
-            <td>{{ slot['start_time'].strftime('%Y-%m-%d') }}</td>
-            <td>{{ slot['start_time'].strftime('%H:%M') }}</td>
-            <td>{{ slot['end_time'].strftime('%Y-%m-%d') }}</td>
-            <td>{{ slot['end_time'].strftime('%H:%M') }}</td>
-            <td>
-                <button class="delete-btn" data-id="{{ slot['_id'] }}">Remove</button>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p>No availability listed.</p>
-    {% endif %}
-    </body> -->
-    
-
-    
-    
 
     <!--Testing trying to move calendar to ta.html-->
     <div class="container-calendar">
@@ -230,8 +184,10 @@
     <script>
         // This makes the Python availability_data available to JavaScript.
         let availability_data = {{ availability_data | tojson }};
+        console.log("Availability Data:", availability_data);
         // This makes the Python formatted_shifts available to JavaScript.
         let formatted_shifts = {{ formatted_shifts | tojson }};
+        console.log("Formatted Shifts:", formatted_shifts);
     </script>
 
 

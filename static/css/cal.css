@@ -3,7 +3,7 @@
 /* General styling for the entire page */
 body {
 	font-family: Arial, sans-serif;
-	background-color: rgb(173, 214, 246);
+	background-color: rgb(254, 254, 254);
 	margin: 0;
 }
 
@@ -15,13 +15,16 @@ body {
 /* Calendar container */
 .container-calendar {
 	background: #ffffff;
-	padding: 10px;
+	padding: 30px;
 	max-width: 900px;
 	margin: 0 auto;
-	overflow: auto;
+	
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-	display: flex;
-	justify-content: space-between;
+	border: 1px solid #ccc; /* Add border only around the calendar */
+	display: block;
+	height: auto; /* Ensure it adapts to content height */
+	
+	
     
 }
 
@@ -144,18 +147,19 @@ body {
 }
 
 
-
 /* Calendar table */
 .table-calendar {
 	border-collapse: collapse;
 	width: 100%;
+	max-width: 700px;
+	margin: auto;
     /*Changes the size of the font inside of the calendar*/
-    font-size: 20px;
+    font-size: 25px;
 }
 
 .table-calendar td,
 .table-calendar th {
-	padding: 10px;
+	padding: 15px;
 	border: 1px solid #e2e2e2;
 	text-align: center;
 	vertical-align: top;
@@ -185,7 +189,7 @@ body {
 
 /* Hover effect for date cells */
 .date-picker:hover {
-	background-color: rgb(249, 96, 96);
+	background-color: rgb(96, 218, 249);
 	color: white;
 	cursor: pointer;
 }
@@ -231,16 +235,9 @@ body {
 	padding: 5px 1em;
 }
 
-.available {
-    background-color: lightgreen !important;
-    color: white;
-    border-radius: 0%;
-    cursor: pointer;
-}
 
-.available:hover {
-    background-color: darkgreen;
-}
+
+
 
 .modal {
     display: none; /* Hidden by default */
@@ -310,3 +307,165 @@ body {
 .shift-item {
 	margin: 10px 0;
 }
+
+
+
+/* Styling for availability */
+.available {
+    background-color: rgb(120, 213, 120) !important;
+    color: white;
+    border-radius: 0%;
+    cursor: pointer;
+}
+
+/* Styling for availability hover */
+.available:hover {
+    background-color: rgb(2, 79, 2);
+}
+
+
+/* Styling for approved shifts */ 
+.approved {
+    background-color: rgb(224, 84, 84);
+    color: white;
+}
+
+/* Styling for approved shifts hover */ 
+.approved:hover {
+    background-color: #ee1909;
+    color: white;
+}
+
+/* Styling for pending shifts */
+.pending {
+    background-color: yellow;
+    color: rgb(253, 252, 252);
+}
+
+/* Styling for pending shifts hover */
+.pending:hover {
+    background-color: rgb(208, 208, 18);
+    color: rgb(250, 249, 249);
+}
+
+/* Styling for rejected shifts */
+.rejected {
+    background-color: rgb(163, 160, 160);
+    color: white;
+}
+
+/* Styling for rejected shifts hover */
+.rejected:hover {
+    background-color: rgb(122, 116, 116);
+    color: white;
+}
+
+
+.login-page {
+    background-color: white; /* Red background for the login page */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items at the top (default behavior) */
+    height: 100vh; /* Full viewport height */
+    padding-top: 33.33vh; /* Move the login form down by about one-third of the viewport height */
+}
+
+
+
+
+/* Styling for Login Page */ 
+
+
+
+/* Container to center the card */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+/* The card that holds the login form */
+.login-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;  /* Fixed width for the card */
+    text-align: center;
+}
+
+/* Title styling */
+.login-title {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Form field styling */
+.login-field {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+	
+}
+
+/* Submit button styling */
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #fd2807; /* Blue button */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #b72e00; /* Darker blue on hover */
+}
+
+/* Error message styling */
+.error {
+    color: red;
+    font-size: 14px;
+    display: none; /* Initially hidden */
+}
+
+/* Visible error message */
+.error--hidden {
+    display: none;
+}
+
+/* Optional: Adding a focus effect on form inputs */
+.login-field:focus {
+    outline: none;
+    border-color: #007bff;  /* Change border color to blue when focused */
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Styling for Cardiff University Logo */
+.top-right-logo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 100px; /* Adjust as needed */
+    height: auto; /* Maintains aspect ratio */
+}
+
+
+

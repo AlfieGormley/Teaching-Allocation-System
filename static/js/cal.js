@@ -6,6 +6,7 @@
 let availabilityDates = [];
 let availabilityMap = {};
 
+
 // Loop through availability_data 
 if (typeof availability_data !== "undefined") {
     availability_data.forEach(slot => {
@@ -20,10 +21,48 @@ if (typeof availability_data !== "undefined") {
 
         availabilityMap[fullDate].push(timeRange);
 
-        //availabilityDates.push(fullDate);
-        //availabilityMap[fullDate] = timeRange;
     });
 }
+
+
+
+
+
+// Initialize global lookup arrays/objects for shifts:
+let shiftDates = [];
+let shiftMap = {};
+
+console.log('Formatted Shifts:', formatted_shifts);
+
+//CURRENTLY WORKING ON - CURRENTLY WORKING ON - CURRENTLY WORKING ON - CURRENTLY WORKING ON
+
+// Loop through shift_data 
+if (typeof formatted_shifts !== "undefined") {
+    formatted_shifts.forEach(shift => {
+        let fullDate = shift.date;
+		let timeRange = `${shift.start_time} - ${shift.end_time}`; 
+
+        let shiftInfo = {
+			building: shift.building,
+            timeRange: timeRange,
+            room: shift.room,
+			ta_id: shift.ta_id,
+			ml_id: shift.ml_id,
+            status: shift.status,
+			description: shift.description
+        };
+
+        if (!shiftMap[fullDate]) {
+            shiftMap[fullDate] = [];
+            shiftDates.push(fullDate);
+        }
+
+        shiftMap[fullDate].push(shiftInfo);
+    });
+}
+
+console.log('Shift Map:', shiftMap); // Log the entire shiftMap
+
 
 
 // Define an array to store events
@@ -198,6 +237,30 @@ function showCalendar(month, year) {
 
                     //cell.setAttribute("title", `Available: ${availabilityMap[fullDate]}`);
                 }
+
+				// Check if the date exists in our shiftDates array
+				if (shiftDates.includes(fullDate)) {
+					console.log('Checking shifts for:', fullDate); // Log the fullDate to see if it's being checked
+
+					//Loop through shifts for the current date
+					shiftMap[fullDate].forEach(shift => {
+						//Check the shift status
+						let shiftStatus = shift.status; // approved, pending, or rejected
+
+						// Apply color based on status
+						if (shiftStatus === "approved") {
+							cell.classList.add("approved"); // Green colour for approved
+						} else if (shiftStatus === "pending") {
+							cell.classList.add("pending"); // Yellow colour for pending
+						} else if (shiftStatus === "rejected") {
+							cell.classList.add("rejected"); // Red colour for rejected
+						}
+
+						// Set a tooltip for the shift
+						let tooltipText = `Shift for Room ${shift.room}: ${shift.timeRange} - Status: ${shift.status}`;
+						cell.setAttribute("title", tooltipText);
+					});
+				}
                 
                 
                 //This styles the current date differently to the others

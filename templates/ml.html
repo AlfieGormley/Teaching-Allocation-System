@@ -145,6 +145,12 @@
 <p>User Role: {{ role }}</p>
 <body data-role="{{ role }}">
 
+    <script>
+        // This makes the Python formatted_shifts available to JavaScript.
+        let formatted_shifts = {{ formatted_shifts | tojson }};
+        console.log("Formatted Shifts:", formatted_shifts);
+    </script>
+
 
 
 <script src="/static/js/cal.js"></script>
