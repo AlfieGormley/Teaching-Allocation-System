@@ -775,8 +775,8 @@ class User:
             print("Randomly selected TA candidate:", best_ta)
             
             
-            
-        #Mode in which admin grants approval pre TA allocation
+        
+        #Mode in which admin grants approval pre TA allocation ✅
         elif operation_mode == 2:
 
             print("Running Operation Mode 2")
@@ -875,7 +875,7 @@ class User:
         return jsonify(success=True, message="Form Data sent successfully HELLLO")
     
     
-        
+    #Maybe could add a check to see if a TA has been assigned to the shift already?
     def manage_pending_shift():
         
         #Collect action "approve/deny"
@@ -893,6 +893,7 @@ class User:
         for shift_doc in shift_docs:
             print("Processing shift:", shift_doc)
             
+            #Process Shift Info
             shift_info = {
                 "shift_id": shift_doc["_id"],  
                 "ta_id": shift_doc["ta_id"],
@@ -942,13 +943,33 @@ class User:
                 
                 #Sets status to rejected
                 User.deny_request(Self, shift_info["shift_id"])
-            
-            
-            
-            
-        
-        
+                
         return jsonify("Form Data Recived:", action)
+    
+    def get_user_shifts(user_id):
+        
+        #Collect relevent shift documents
+        shift_docs = list(db.shifts.find({"ta_id": user_id}))
+        
+        #Format Shift data to send to front end
+        formatted_shifts = []
+        for shift in shift_docs:
+            formatted_shifts.append({
+                "shift_id": shift["_id"],
+                "ta_id": shift["ta_id"],
+                "ml_id": shift["ml_id"],
+                "date": shift["date"],
+                "start_time": shift["start_time"].strftime("%H:%M"),
+                "end_time": shift["end_time"].strftime("%H:%M"),
+                "room": shift["room"],
+                "building": shift["building"],
+                "floor": shift["floor"],
+                "description": shift["description"],
+                "status": shift["status"]
+            })
+        
+        print(formatted_shifts)
+        return formatted_shifts
             
         
     

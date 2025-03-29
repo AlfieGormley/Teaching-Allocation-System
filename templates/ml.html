@@ -124,6 +124,24 @@
         </div>
     </div>
 
+    <body>
+        <h1>Shift Data</h1>
+
+        {% if formatted_shifts %}
+            <ul>
+                {% for s in formatted_shifts %}
+                    <li>Shift ID: {{ s.shift_id }} | Date: {{ s.date }} | Status: {{ s.status }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No shift data found.</p>
+        {% endif %}
+
+    </body>
+
+
+
+
 <p>User Role: {{ role }}</p>
 <body data-role="{{ role }}">
 

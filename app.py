@@ -2,6 +2,13 @@ from flask import Flask, render_template, session, redirect
 from functools import wraps
 import pymongo
 
+
+
+
+
+
+
+
 #Create an instance of the app
 app = Flask(__name__)
 
@@ -52,18 +59,16 @@ def ta():
     #Store results in a dictionary
     compsci_skills = [{"_id": skill["_id"], "name": skill["name"]} for skill in compsci_skill_cursor]
     
-    print(compsci_skills)
-    
-    
-
-    #Get the _id of the user in session
+    #Collect User ID from session
     user_id = session.get('user').get('_id')
-    role = session.get('user').get('role')
     
+    #Collect Role from session
+    role = session.get('user').get('role')
     
     #Query the skillset of appropriate _id from collection users
     user = db.users.find_one({"_id": user_id})
     skills = user.get('skillset', [])
+    
     
     availability = list(db.availability.find({"user_id": user_id}))
     
@@ -89,7 +94,6 @@ def ta():
 @login_required(role="Module Leader")
 def ml():
     
-    
     #find the _id and name of each skill inside the collection
     compsci_skill_cursor =  db.compsci_skills.find({}, {"_id": 1, "name": 1})
     
@@ -100,13 +104,42 @@ def ml():
     
     buildings = [{"_id": building["_id"], "name": building["name"], "floors": building["floors"]} for building in buildings_cursor]
     
-    
-    
+    #Collect User ID from session
     user_id = session.get('user').get('_id')
+    
+    #Collect Role from session
     role = session.get('user').get('role')
     
+    #Collects all shift data for the user_id?
+    shift_docs = list(db.shifts.find({"ml_id": user_id}))
+        
+    #Format Shift data to send to front end
+    formatted_shifts = []
+    for shift in shift_docs:
+        formatted_shifts.append({
+            "shift_id": shift["_id"],
+            "ta_id": shift["ta_id"],
+            "ml_id": shift["ml_id"],
+            "date": shift["date"],
+            "start_time": shift["start_time"].strftime("%H:%M"),
+            "end_time": shift["end_time"].strftime("%H:%M"),
+            "room": shift["room"],
+            "building": shift["building"],
+            "floor": shift["floor"],
+            "description": shift["description"],
+            "status": shift["status"]
+            })
     
-    return render_template('ml.html', role=role, user_id=user_id, compsci_skills=compsci_skills, buildings=buildings)
+    print(formatted_shifts)
+    
+    
+    
+    
+    #Send approved shifts with ml_id = user_id
+    
+    
+    
+    return render_template('ml.html', role=role, user_id=user_id, compsci_skills=compsci_skills, buildings=buildings, formatted_shifts=formatted_shifts)
 
 @app.route('/admin/')
 @login_required(role="Admin")
