@@ -552,12 +552,10 @@ class User:
             #Collect shift records for this TA on the same date
             shift_records = list(db.shifts.find({"ta_id": ta, "date": date, "status": "approved"}))
             
-            
             #No shifts -> TA is available
             if not shift_records:
                 eligible_tas.append(ta)
                 continue  # No need to check further
-            
             
             # Check if any scheduled shift prevents TA from taking the new one
             available = True
@@ -575,9 +573,6 @@ class User:
                 #Calculate Commute Time
                 commute_time = User.calculate_commute_time(Self, scheduled_building, building, scheduled_floor, floor)
                 print("Commute Time:", commute_time) #Debugging
-                
-                #Assess each shift record to esnure it doesnt prevent the tas availability
-                
                 
                 # Convert commute_time to timedelta
                 commute_duration = timedelta(seconds=commute_time)
@@ -599,21 +594,34 @@ class User:
                 continue
                     
         return eligible_tas
-                    
-            
-
+    
+    
+    #Assigns TA, status = "approved" for given shift_id
+    def approve_and_assign_ta(self, shift_id, ta_id):
         
-        #Iterate through available_tas "user_id"
-            #Collect shift_records on the same date
-                #if len(shift_records) == 0:
-
-                    #return ("No TAs Removed")
-                
-                #commute = (sheduled_floor + floor) * floor_travel_time
-                
-                #Assess each shift record to esnure it doesnt prevent the tas availability
-                    #Result = (scheduled_end_time + commute) < start_time
-                        
+        #Search shift_id and update relevent fields
+        db.shifts.update_one(
+            {"_id": shift_id},  
+            {"$set": {"ta_id": ta_id, "status": "approved"}}
+        )
+        
+        print(f"Shift {shift_id} has been assigned to TA {ta_id} and approved.")
+        
+        return
+    
+    def deny_request(self, shift_id):
+        
+        #Search shift_id and update relevent fields
+        db.shifts.update_one(
+            {"_id": shift_id},  
+            {"$set": {"status": "rejected"}}
+        )
+        
+        print(f"Shift {shift_id} has been rejected.")
+        
+        
+        
+ 
                     
         
         
@@ -726,6 +734,7 @@ class User:
             #Remove TAS who CAN'T from available_tas
             #Remove TAS who CAN'T from available_tas
             #Remove TAS who CAN'T from available_tas
+            #Call filter_available_tas()
                 
             #Collect all the skill documents and calculate their rarity
             skill_rarity, all_skill_docs = User.skill_rankings(self)
@@ -758,6 +767,7 @@ class User:
             #Remove TAS who CAN'T from available_tas
             #Remove TAS who CAN'T from available_tas
             #Remove TAS who CAN'T from available_tas
+            #Call filter_available_tas()
             
             #Randomly select a candidate
             best_ta = random.choice(list(available_tas))
@@ -811,15 +821,7 @@ class User:
             available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
             
             
-            #Out of available_tas who can make it factoring commute time
-            #(We essentially need to check if the end-time of their last shift + commute time <= start_time of this shift)
-            #For every user_id in available_tas
-                #Search Shifts where 
-                    #date = requested_date
-                    #pending = FALSE
-                    
-                    
-            #Remove TAS who CAN'T from available_tas
+            #Call filter_available_tas ()
         
                 
             #Collect all the skill documents and calculate their rarity
@@ -884,9 +886,10 @@ class User:
         shift_ids = request.form.getlist("shift_ids")
         print("Shift_ids:", shift_ids) #Debugging
         
-        
+        #Collect Relevant Shift Documents
         shift_docs = list(db.shifts.find({"_id": {"$in": [shift_id for shift_id in shift_ids]}}))
         
+        #Loop Through Shift Documents
         for shift_doc in shift_docs:
             print("Processing shift:", shift_doc)
             
@@ -916,28 +919,33 @@ class User:
                 #Collect ta_candidates with matching availablility
                 available_tas = User.get_available_tas(Self, ta_candidates, shift_info["start_time"], shift_info["end_time"])
                 print("Available TAs:", available_tas)
-                
-                
-                #NEED TO WORK ON THIS FUNCTION BEFORE I CAN PROGRESS
+            
                 #Out of these TAs who can make it factoring commute time    
                 eligible_tas = User.filter_available_tas(Self, shift_info["floor"], shift_info["start_time"], available_tas, shift_info["date"], shift_info["building_id"])
-                
-                #Call skill_rankings()
-                
-                #Call ta_scores(self, available_tas, all_skill_docs, skill_rarity)
-                
-                #Set ta_id in shift document to best_ta
-                
-                #Set shift status to approved
-                
                 print("Eligble TAs:", eligible_tas)
+                
+                #Calculates the rarity of each skill in a ranking system
+                skill_rarity, all_skill_docs = User.skill_rankings(Self)
+                    
+                #Sorts the eligible TAs according to skill_rarity, first in list = lowest uniquness
+                sorted_tas = User.ta_scores(Self, eligible_tas, all_skill_docs, skill_rarity)
+                
+                #Select the TA with the lowest uniqueness score
+                best_ta = sorted_tas[0][0] if sorted_tas else None
+                
+                #Assigns TA and approves the shift
+                User.approve_and_assign_ta(Self,  shift_info["shift_id"], best_ta)
+                
                 
             elif action == "deny":
                 print("Rejecting Request")
+                
+                #Sets status to rejected
+                User.deny_request(Self, shift_info["shift_id"])
             
             
             
-            #shift_data.append(shift_info)
+            
         
         
         return jsonify("Form Data Recived:", action)
