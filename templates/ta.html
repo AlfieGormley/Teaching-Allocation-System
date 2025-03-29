@@ -205,6 +205,20 @@
     </div>
 
 
+    <body>
+        <h1>Shift Data</h1>
+
+        {% if formatted_shifts %}
+            <ul>
+                {% for s in formatted_shifts %}
+                    <li>Shift ID: {{ s.shift_id }} | Date: {{ s.date }} | Status: {{ s.status }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No shift data found.</p>
+        {% endif %}
+
+    </body>
 
 
 
@@ -216,6 +230,8 @@
     <script>
         // This makes the Python availability_data available to JavaScript.
         let availability_data = {{ availability_data | tojson }};
+        // This makes the Python formatted_shifts available to JavaScript.
+        let formatted_shifts = {{ formatted_shifts | tojson }};
     </script>
 
 

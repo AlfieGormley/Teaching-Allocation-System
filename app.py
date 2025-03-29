@@ -87,8 +87,28 @@ def ta():
             "end_time": slot['end_time'].strftime('%H:%M')       # Convert time to HH:MM
         })
     
+    #Collects all shift data for the user_id?
+    shift_docs = list(db.shifts.find({"ta_id": user_id}))
+        
+    #Format Shift data to send to front end
+    formatted_shifts = []
+    for shift in shift_docs:
+        formatted_shifts.append({
+            "shift_id": shift["_id"],
+            "ta_id": shift["ta_id"],
+            "ml_id": shift["ml_id"],
+            "date": shift["date"],
+            "start_time": shift["start_time"].strftime("%H:%M"),
+            "end_time": shift["end_time"].strftime("%H:%M"),
+            "room": shift["room"],
+            "building": shift["building"],
+            "floor": shift["floor"],
+            "description": shift["description"],
+            "status": shift["status"]
+            })
     
-    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data, compsci_skills=compsci_skills, role=role)
+    
+    return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data, compsci_skills=compsci_skills, role=role, formatted_shifts=formatted_shifts)
 
 @app.route('/ml/')
 @login_required(role="Module Leader")
