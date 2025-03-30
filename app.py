@@ -178,6 +178,20 @@ def admin():
         #Extract ML name
         ml_name = ml_data["name"]
         
+        ta_id = shift["ta_id"]
+        
+        #If TA has been asigned
+        if ta_id != "Not Yet Assigned":
+            
+            #Look up the TA
+            ta_data = db.users.find_one({"_id": shift["ta_id"]})
+            
+            #Extract TA name
+            ta_name = ta_data["name"]
+        
+        else: 
+            ta_name = "Not Yet Assigned"
+            
         #Look up the building
         building_data = db.buildings.find_one({"_id": shift["building"]})
         
@@ -187,11 +201,13 @@ def admin():
         shift_data = {
             "shift_id": shift["_id"],
             "ml_name": ml_name,
+            "ta_name": ta_name,
             "date": shift["date"],
             "start_time": shift["start_time"],
             "end_time": shift["end_time"],
             "building_name": building_name,
             "room_name": shift["room"],
+            
         }
         
         pending_shifts.append(shift_data)

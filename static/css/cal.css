@@ -189,7 +189,7 @@ body {
 
 /* Hover effect for date cells */
 .date-picker:hover {
-	background-color: rgb(96, 218, 249);
+	background-color: rgb(243, 116, 116);
 	color: white;
 	cursor: pointer;
 }
@@ -323,7 +323,6 @@ body {
     background-color: rgb(2, 79, 2);
 }
 
-
 /* Styling for approved shifts */ 
 .approved {
     background-color: rgb(224, 84, 84);
@@ -338,13 +337,13 @@ body {
 
 /* Styling for pending shifts */
 .pending {
-    background-color: yellow;
-    color: rgb(253, 252, 252);
+    background-color: rgb(234, 170, 9);
+    color: white;
 }
 
 /* Styling for pending shifts hover */
 .pending:hover {
-    background-color: rgb(208, 208, 18);
+    background-color: rgb(215, 156, 8, 0.965);
     color: rgb(250, 249, 249);
 }
 
@@ -359,6 +358,63 @@ body {
     background-color: rgb(122, 116, 116);
     color: white;
 }
+
+
+/* Approved & Pending (Diagonal Red & Yellow) */
+.approved.pending {
+    background: linear-gradient(135deg, rgb(231, 50, 10) 50%, rgb(234, 170, 9) 50%);
+	color: white;
+}
+
+/* Approved & Pending hover (Diagonal Red & Yellow) */
+.approved.pending:hover {
+    background: linear-gradient(135deg, rgb(231, 50, 10, 0.788) 50%, rgb(215, 156, 8, 0.965) 50%);
+	color: white;
+}
+
+/* Approved & rejected (Diagonal Red & Grey) */
+.approved.rejected {
+    background: linear-gradient(135deg, rgb(231, 50, 10) 50%, rgb(163, 160, 160) 50%);
+	color: white;
+}
+
+/* Approved & rejected hover (Diagonal Red & Grey) */
+.approved.rejected:hover {
+    background: linear-gradient(135deg, rgb(231, 50, 10, 0.788) 50%, rgb(163, 160, 160) 50%);
+	color: white;
+}
+
+/* Approved, Rejected, and Pending (Three-Way Diagonal Split) */
+.approved.rejected.pending {
+    background: conic-gradient(
+        rgb(231, 50, 10) 0deg 120deg,  /* Red */
+        rgb(163, 160, 160) 120deg 240deg, /* Grey */
+        rgb(234, 170, 9) 240deg 360deg            /* Orange */
+    );
+}
+
+/* Approved, Rejected, and Pending hover (Three-Way Diagonal Split) */
+.approved.rejected.pending:hover {
+    background: conic-gradient(
+        rgba(231, 50, 10, 0.788) 0deg 120deg,  /* Red */
+        rgba(145, 142, 142, 0.941) 120deg 240deg, /* Grey */
+        rgb(215, 156, 8, 0.965) 240deg 360deg            /* Orange */
+    );
+}
+
+/* pending & rejected (Diagonal orange & Grey) */
+.pending.rejected {
+    background: linear-gradient(135deg, rgb(234, 170, 9) 50%, rgb(163, 160, 160) 50%);
+	color: white;
+}
+
+/* pending & rejected hover (Diagonal orange & Grey) */
+.pending.rejected:hover {
+    background: linear-gradient(135deg, rgba(215, 156, 8, 0.965) 50%, rgba(145, 142, 142, 0.941) 50%);
+	color: white;
+}
+
+
 
 
 .login-page {
