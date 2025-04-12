@@ -170,47 +170,54 @@ def admin():
     
     pending_shifts = []
     
-    for shift in pending_shift_docs:
-        
-        #Look up the module leader
-        ml_data = db.users.find_one({"_id": shift["ml_id"]})
-        
-        #Extract ML name
-        ml_name = ml_data["name"]
-        
-        ta_id = shift["ta_id"]
-        
-        #If TA has been asigned
-        if ta_id != "Not Yet Assigned":
+    if pending_shift_docs:
+        for shift in pending_shift_docs:
             
-            #Look up the TA
-            ta_data = db.users.find_one({"_id": shift["ta_id"]})
+            #Look up the module leader
+            ml_data = db.users.find_one({"_id": shift["ml_id"]})
             
-            #Extract TA name
-            ta_name = ta_data["name"]
-        
-        else: 
-            ta_name = "Not Yet Assigned"
+            #Extract ML name
+            ml_name = ml_data["name"]
             
-        #Look up the building
-        building_data = db.buildings.find_one({"_id": shift["building"]})
-        
-        #Look up Building name
-        building_name = building_data["name"]
-        
-        shift_data = {
-            "shift_id": shift["_id"],
-            "ml_name": ml_name,
-            "ta_name": ta_name,
-            "date": shift["date"],
-            "start_time": shift["start_time"],
-            "end_time": shift["end_time"],
-            "building_name": building_name,
-            "room_name": shift["room"],
+            ta_id = shift["ta_id"]
             
-        }
-        
-        pending_shifts.append(shift_data)
+            #If TA has been asigned
+            if ta_id != "Not Yet Assigned":
+                
+                #Look up the TA
+                ta_data = db.users.find_one({"_id": shift["ta_id"]})
+                
+                if ta_data and "name" in ta_data:
+                
+                    #Extract TA name
+                    ta_name = ta_data["name"]
+            
+            else: 
+                ta_name = "Not Yet Assigned"
+                
+            #Look up the building
+            building_data = db.buildings.find_one({"_id": shift["building"]})
+            
+            # Check if building exists
+            if building_data is None:
+                building_name = "Unknown Building"  
+                app.logger.error(f"Building with ID {shift['building']} not found.")
+            else:
+                building_name = building_data["name"]
+            
+            shift_data = {
+                "shift_id": shift["_id"],
+                "ml_name": ml_name,
+                "ta_name": ta_name,
+                "date": shift["date"],
+                "start_time": shift["start_time"],
+                "end_time": shift["end_time"],
+                "building_name": building_name,
+                "room_name": shift["room"],
+                
+            }
+            
+            pending_shifts.append(shift_data)
         
     
     #find the _id and name of each skill inside the collection

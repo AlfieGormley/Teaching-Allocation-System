@@ -2,3 +2,13 @@ body {
     background-color: #f0533b;
 }
 
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 2em;  /* Space below the header */
+}
+
+.signout-btn {
+    margin-right: 5em;  /* Space between button and heading */
+}

@@ -398,13 +398,34 @@ class User:
         #Set timezone
         timezone = pytz.timezone("UTC")
         
+        # Helper function to check if the time is already a datetime object
+        def localize_if_needed(time, requested_date=None):
+            if isinstance(time, datetime):  # If it's already a datetime object
+                # If the datetime is naive (no timezone), localize it to UTC
+                return time if time.tzinfo else timezone.localize(time)
+            else:  # If it's a string (in your case, in the format "YYYY-MM-DD HH:MM")
+                # Parse the string into a datetime object and localize to UTC
+                return timezone.localize(datetime.strptime(f"{requested_date} {time}", "%Y-%m-%d %H:%M"))
+
+        # Check and convert start_time
+        if isinstance(start_time, datetime):  # If it's already a datetime object
+            start_time_iso = localize_if_needed(start_time)
+        else:
+            start_time_iso = localize_if_needed(start_time, requested_date)
+
+        # Check and convert end_time
+        if isinstance(end_time, datetime):  # If it's already a datetime object
+            end_time_iso = localize_if_needed(end_time)
+        else:
+            end_time_iso = localize_if_needed(end_time, requested_date)
+        
         #Convert to ISODate Format
-        start_time_iso = datetime.strptime(f"{requested_date} {start_time}", "%Y-%m-%d %H:%M")
-        end_time_iso = datetime.strptime(f"{requested_date} {end_time}", "%Y-%m-%d %H:%M")
+        #start_time_iso = datetime.strptime(f"{requested_date} {start_time}", "%Y-%m-%d %H:%M")
+        #end_time_iso = datetime.strptime(f"{requested_date} {end_time}", "%Y-%m-%d %H:%M")
         
         #Localise with the time zone
-        start_time_iso = timezone.localize(start_time_iso)
-        end_time_iso = timezone.localize(end_time_iso)
+        #start_time_iso = timezone.localize(start_time_iso)
+        #end_time_iso = timezone.localize(end_time_iso)
         
         return start_time_iso, end_time_iso
     
@@ -597,19 +618,25 @@ class User:
     
     
     #Assigns TA, status = "approved" for given shift_id
-    def approve_and_assign_ta(self, shift_id, ta_id):
+    def approve_and_assign_ta(self, shift_id, ta_id, status):
+        
+        
+        if status == "pending":
+            #Adjust the Queue
+            print("Adjusting queue")
+            User.adjust_queue()
         
         #Search shift_id and update relevent fields
         db.shifts.update_one(
             {"_id": shift_id},  
             {"$set": {"ta_id": ta_id, "status": "approved"}}
         )
+            
+            
+        return print(f"Shift {shift_id} has been assigned to TA {ta_id} and approved.")
         
-        print(f"Shift {shift_id} has been assigned to TA {ta_id} and approved.")
-        
-        return
     
-    def deny_request(self, shift_id):
+    def deny_request(self, shift_id, status):
         
         #Search shift_id and update relevent fields
         db.shifts.update_one(
@@ -617,6 +644,12 @@ class User:
             {"$set": {"status": "rejected"}}
         )
         
+        #Adjust the Queue
+        if status == "pending":
+            #Adjust the Queue
+            print("Adjusting queue")
+            User.adjust_queue()
+            
         print(f"Shift {shift_id} has been rejected.")
         
         
@@ -690,20 +723,18 @@ class User:
     
     #NOTES ON THE ALGORITHM:
     
-    #(1) - After Admin approval variable changes effect pending requests results
-    
-    #(2) - Consider Maxmium/Minumum Work Quotas
-    
-    #(3) - Consider no TA's matching requirements
+    #(1) - Consider Maxmium/Minumum Work Quotas
     
     #(4) - If no TAs available: 
     #           Store list of close candidates who could be considered if the quota isnt matched
     
     #(5) - Maybe on ML form, if no available_tas, what degree of lateness would be acceptable?
     
+    
+    
     def request_support(self):
         
-        #Collect Module Leader _id from the sessio
+        #Collect Module Leader _id from the session
         ml_id = session.get('user').get('_id')
         
         #Collect the currently active operation mode document
@@ -726,16 +757,14 @@ class User:
         
         #if a queue is needed
         if is_queued_mode:
-            
+
             # Get queue position (count shifts in queue)
-            queue_position = db.shifts.count_documents({"status": {"$in": ["pending", "queued"]}}) + 1
-            status = "pending" if queue_position == 1 else "queued"
+            queue_position = db.shifts.count_documents({"status": {"$in": ["pending", "queued"]}}) 
+            status = "pending" if queue_position == 0 else "queued"
         else:
             status = "pending"
-        
-        print("Status:", status)
-        
-        
+            
+        #BUILD THIS INTO EACH FUNCTION AND GIVE THE ADMIN AN OPTION TO DISABLE IT
         #If room is on the ground floor:
         if floor == "G":
             print("Searching for Disbaled TAs With Suitable Availability")
@@ -743,129 +772,39 @@ class User:
             #Collect TAs with mobility issues matching the desired skill set
             ta_candidates = User.get_disabled_ta_candidates(self, skills)
             
-            #Collect the ta_candidates with matching availablility
-            available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
-            
-            #Remove TAS who CAN'T from available_tas
-            #Remove TAS who CAN'T from available_tas
-            #Remove TAS who CAN'T from available_tas
-            #Call filter_available_tas()
-                
-            #Collect all the skill documents and calculate their rarity
-            skill_rarity, all_skill_docs = User.skill_rankings(self)
-            
-            #Sorts the available TAs according to skill_rarity, first in list = lowest uniquness
-            sorted_tas = User.ta_scores(self, available_tas, all_skill_docs, skill_rarity)
-            
-            #Select the TA with the lowest uniqueness score
-            best_ta = sorted_tas[0][0] if sorted_tas else None
-            
             #Get TAs who have the desired skill set with mobility issues
             return print("Disabled Candidates:", ta_candidates)
         
         
-        #Need to work on some sort of queue for modes where the admin sees the TA before approving
-        #Queue needed must be done one at a time
-        #Mode to randomise TA selection out of the eligible TAs matching the skill set 
+        
+        #Mode to randomise TA selection out of the eligible TAs matching the skill set Admin sees TA before approval
         elif operation_mode == 1:
             print("Running Operation Mode 1")
-            
-            #Get TAs who have the desired skill set
-            ta_candidates = User().get_ta_candiates(skills)
-            
-            #Collect ta_candidates with matching availablility
-            available_tas = list(User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso))
-            
-            #Out of these TAs who can make it factoring commute time 
-            eligible_tas = User.filter_available_tas(self, floor, start_time, available_tas, requested_date, building_id)
-            
-            #Randomly select a candidate
-            best_ta = random.choice(eligible_tas)
-            
-            print("Randomly selected TA candidate:", best_ta)
-            
-            shift_doc = {
-                "_id": uuid.uuid4().hex,
-                "ta_id": best_ta,
-                "ml_id": ml_id,
-                "date": requested_date,
-                "start_time": start_time_iso,
-                "end_time": end_time_iso,
-                "room": room,
-                "building": building_id,
-                "floor": floor,
-                "description": description,
-                "skills": skills,
-                "operation_mode": operation_mode,
-                "time_stamp": datetime.now(),
-                "status": status
-            }
-            
-            
         
         #Mode in which admin grants approval pre TA allocation ✅
         elif operation_mode == 2:
-
             print("Running Operation Mode 2")
-            
-            #Create shift document for admin approval
-            shift_doc = {
-                "_id": uuid.uuid4().hex,
-                "ta_id": "Not Yet Assigned",
-                "ml_id": ml_id,
-                "date": requested_date,
-                "start_time": start_time_iso,
-                "end_time": end_time_iso,
-                "room": room,
-                "building": building_id,
-                "floor": floor,
-                "description": description,
-                "skills": skills,
-                "operation_mode": operation_mode,
-                "time_stamp": datetime.now(),
-                "status": status  #Could be: "pending", "approved", "rejected", "completed"
-            }
-            
-            #Store the document in the shifts collection
-            db.shifts.insert_one(shift_doc)
-            
+            best_ta = "Not Yet Assigned"
             
         #Mode in which admin can select candidate based on a specific quota (TA information will have to be displayed)
         elif operation_mode == 3:
-            
             print("Running Operation Mode 3") 
-        
         
         #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
         elif operation_mode == 4:
-            print("Running Operation Mode 4")
-            print("Searching for TAs With Suitable Availability and skill set")
-            
-            #Get TAs who have the desired skill set
-            ta_candidates = User().get_ta_candiates(skills)
-            
-            #Collect ta_candidates with matching availablility
-            available_tas = User.get_available_tas(self, ta_candidates, start_time_iso, end_time_iso)
-            
-            #Out of these TAs who can make it factoring commute time 
-            #Call filter_available_tas ()
+            print("Running Operation Mode 4!!!")
+            #Call operation mode 4
+            best_ta, status, shift_id = User.operation_mode_4(skills, start_time, end_time, floor, requested_date, building_id, "Not Yet Assigned", status)
+           
         
-                
-            #Collect all the skill documents and calculate their rarity
-            skill_rarity, all_skill_docs = User.skill_rankings(self)
-            
-            #Sorts the available TAs according to skill_rarity, first in list = lowest uniquness
-            sorted_tas = User.ta_scores(self, available_tas, all_skill_docs, skill_rarity)
-            
-            #Select the TA with the lowest uniqueness score
-            best_ta = sorted_tas[0][0] if sorted_tas else None
-            
-            
-            #This document needs to be stored in the shifts collection all docs with a pending status
-            #All docs with a pending status send to admin pannel 
-            
-            shift_doc = {
-                "_id": uuid.uuid4().hex,
+        #Automatic mode, no Admin approval needed
+        elif operation_mode == 5:
+            print("Running Operation Mode 5")
+
+
+        #Create shift document
+        shift_doc = {
+                "_id": shift_id,
                 "ta_id": best_ta,
                 "ml_id": ml_id,
                 "date": requested_date,
@@ -876,35 +815,22 @@ class User:
                 "floor": floor,
                 "description": description,
                 "skills": skills,
-                "status": status  #Could be: "pending", "approved", "rejected", "assigned", "completed"
+                "operation_mode": operation_mode,
+                "status": status,
+                "queue_position": queue_position if is_queued_mode else None  
             }
         
-        #Automatic mode, no Admin approval needed
-        elif operation_mode == 5:
-            
-            print("Running Operation Mode 5")
+        #Store the document in the shifts collection
+        db.shifts.insert_one(shift_doc)
 
-
-        #print("User List for each skill:", user_sets)
-        #print("Users who have all the skills:", ta_candidates)
-        #print("TA availability docs:", ta_availability_docs)
-        #print("Available TAs with matching skill set and availability:", available_tas)
-        #print("All skill docs:", all_skill_docs)
-        #print("Skill Counts:", skill_counts)
-        #print("Skill Rarity:", skill_rarity)
+        return jsonify(success=True, message="Shift request added.")
         
-        #print("Sorted TAs:", sorted_tas)
-        #print("Most Suitable TA:", best_ta)
-        #print("Module Leader _id:", ml_id)
-        #print("Shift Doc:", shift_doc)
-        
-        return jsonify (operation_mode)
-        return jsonify(success=True, message="Form Data sent successfully HELLLO")
     
     
     
-    #Maybe could add a check to see if a TA has been assigned to the shift already?
-    #So this method can handle all the modes of operation
+    
+    
+    #Make this method handle all the modes of operation
     def manage_pending_shift():
         
         #Collect action "approve/deny"
@@ -917,7 +843,7 @@ class User:
         
         #Collect Relevant Shift Documents
         shift_docs = list(db.shifts.find({"_id": {"$in": [shift_id for shift_id in shift_ids]}}))
-        
+
         #Loop Through Shift Documents
         for shift_doc in shift_docs:
             print("Processing shift:", shift_doc)
@@ -936,57 +862,280 @@ class User:
                 "description": shift_doc["description"],
                 "skills": shift_doc["skills"], 
                 "operation_mode": shift_doc["operation_mode"],
-                "timestamp": shift_doc["time_stamp"].strftime("%Y-%m-%d %H:%M:%S"),  
                 "status": shift_doc["status"],
             }
             
-            if action == "approve":
-                
-                #Check if a TA as been assigned yet:
-                
-                #Get TAs who have the desired skill set
-                ta_candidates = User().get_ta_candiates(shift_info["skills"])
-                print("TA Candidates:", ta_candidates)
-                
-                #Collect ta_candidates with matching availablility
-                available_tas = User.get_available_tas(Self, ta_candidates, shift_info["start_time"], shift_info["end_time"])
-                print("Available TAs:", available_tas)
+            if action == "approve" and shift_info["operation_mode"] == 1:
+                print("Running Operation Mode 1")
             
-                #Out of these TAs who can make it factoring commute time    
-                eligible_tas = User.filter_available_tas(Self, shift_info["floor"], shift_info["start_time"], available_tas, shift_info["date"], shift_info["building_id"])
-                print("Eligble TAs:", eligible_tas)
+            elif action == "approve" and shift_info["operation_mode"] == 2:
+
+                User.operation_mode_2(shift_info["skills"], shift_info["start_time"], shift_info["end_time"], shift_info["floor"], shift_info["date"], shift_info["building_id"], shift_info["shift_id"], shift_info["status"])
+            
+            elif action == "approve" and shift_info["operation_mode"] == 3:
+                print("Running Operation Mode 3")
+            
+            elif action == "approve" and shift_info["operation_mode"] == 4:
+                print("Running Operation Mode 4!")
+                #Call operation mode 4
+                best_ta, status, shift_id = User.operation_mode_4(shift_info["skills"], shift_info["start_time"], shift_info["end_time"], shift_info["floor"], shift_info["date"], shift_info["building_id"], shift_info["shift_id"], shift_info["status"])
                 
-                #Calculates the rarity of each skill in a ranking system
-                skill_rarity, all_skill_docs = User.skill_rankings(Self)
-                    
-                #Sorts the eligible TAs according to skill_rarity, first in list = lowest uniquness
-                sorted_tas = User.ta_scores(Self, eligible_tas, all_skill_docs, skill_rarity)
+                print("Status before Approval:", status)
+                #status = "approved"
                 
-                #If there are candidates in the list
-                if sorted_tas:
-                    
-                    #Select the TA with the lowest uniqueness score
-                    best_ta = sorted_tas[0][0] if sorted_tas else None
-                    
-                    #Assigns TA and approves the shift
-                    User.approve_and_assign_ta(Self,  shift_info["shift_id"], best_ta)
+                #Assigns TA and approves the shift
+                print("Approving Shift and Assigning TA")
+                User.approve_and_assign_ta(Self, shift_id, best_ta, status)
                 
-                #sorted_tas is empty --> no suitable TAS
-                else:
-                    
-                    #Sets status to rejected
-                    User.deny_request(Self, shift_info["shift_id"])
-                    
-                    #Maybe add some sort of message as to the rejection reason
-                    
-                    
+            
+            elif action == "approve" and shift_info["operation_mode"] == 5:
+                print("Running Operation Mode 5")
+                
             elif action == "deny":
                 print("Rejecting Request")
-                
+        
                 #Sets status to rejected
                 User.deny_request(Self, shift_info["shift_id"])
                 
         return jsonify("Form Data Recived:", action)
+    
+    #Select random TA from eligible TAs, Admin must view TA before approval
+    #Function for approving/denying shifts in operation mode 1
+    def operation_mode_1(skills, start_time, end_time, floor, date, building_id, shift_id, status):
+        
+        #Check if status is pending or queued
+        
+        #Get TAs who have the desired skill set
+        ta_candidates = User().get_ta_candiates(skills)
+            
+        #Collect ta_candidates with matching availablility
+        available_tas = list(User.get_available_tas(Self, ta_candidates, start_time, end_time))
+            
+        #Out of these TAs who can make it factoring commute time 
+        eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id)
+            
+        #Randomly select a candidate
+        best_ta = random.choice(eligible_tas)
+            
+        print("Randomly selected TA candidate:", best_ta)
+        
+        
+        return
+    
+    #Mode in which admin grants approval pre TA allocation ✅
+    #Function for approving/denying shifts in operation mode 2
+    def operation_mode_2(skills, start_time, end_time, floor, date, building_id, shift_id, status):
+        #Get TAs who have the desired skill set
+        ta_candidates = User().get_ta_candiates(skills)
+        print("TA Candidates:", ta_candidates)
+                
+        #Collect ta_candidates with matching availablility
+        available_tas = User.get_available_tas(Self, ta_candidates, start_time, end_time)
+        print("Available TAs:", available_tas)
+            
+        #Out of these TAs who can make it factoring commute time    
+        eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id)
+        print("Eligble TAs:", eligible_tas)
+                
+        #Calculates the rarity of each skill in a ranking system
+        skill_rarity, all_skill_docs = User.skill_rankings(Self)
+                    
+        #Sorts the eligible TAs according to skill_rarity, first in list = lowest uniquness
+        sorted_tas = User.ta_scores(Self, eligible_tas, all_skill_docs, skill_rarity)
+                
+        #If there are candidates in the list
+        if sorted_tas:
+            #Select the TA with the lowest uniqueness score
+            best_ta = sorted_tas[0][0]
+                    
+            #Assigns TA and approves the shift
+            User.approve_and_assign_ta(Self, shift_id, best_ta, status)
+                    
+        #sorted_tas is empty --> no suitable TAS
+        else:
+            #Sets status to rejected
+            User.deny_request(Self, shift_id, status)
+    
+    
+    
+    
+    
+    
+    
+    #We need to work out what to do with shift_id as this may be called while there is no shift id or
+    #May be called on a shift thats already existing
+    
+    #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
+    #Function for approving/denying shifts in operation mode 4
+    
+    #NEED TO ENSURE THE FIRST SHIFT IN THE QUEUE IS GETTING PROCESSED
+    def operation_mode_4(skills, start_time, end_time, floor, date, building_id, shift_id, status):
+        
+        if shift_id == "Not Yet Assigned":
+            print("Shift ID is not yet assigned")
+            shift_id = uuid.uuid4().hex
+            print("Shift_id:", shift_id)
+        
+        print("Processing shift id:", shift_id)
+        
+        #Check if status is pending
+        if status == "pending":
+            
+            #Get TAs who have the desired skill set
+            ta_candidates = User().get_ta_candiates(skills)
+            
+            start_time_iso , end_time_iso = User.convert_to_iso(Self, date, start_time, end_time)
+            
+            #Collect ta_candidates with matching availablility
+            available_tas = User.get_available_tas(Self, ta_candidates, start_time_iso, end_time_iso)
+            print("Available_TAS:", available_tas)
+                
+            #Out of these TAs who can make it factoring commute time 
+            eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id)
+            print("Eligible_TAS:", eligible_tas)
+            
+            #Collect all the skill documents and calculate their rarity
+            skill_rarity, all_skill_docs = User.skill_rankings(Self)
+                
+            #Sorts the available TAs according to skill_rarity, first in list = lowest uniquness
+            sorted_tas = User.ta_scores(Self, eligible_tas, all_skill_docs, skill_rarity)
+            
+            print("Sorted_TAS:", sorted_tas)
+                
+            #Select the TA with the lowest uniqueness score
+            best_ta = sorted_tas[0][0] if sorted_tas else None
+            
+            
+        
+            
+        elif status == "queued":
+            #Shift has been queued waiting for admin to accept approve a "pending" shift
+            print("Shift has been queued")
+            
+            #Check if shift is first in the queue
+            
+            #Can't calculate the best TA yet
+            best_ta = "Not Yet Assigned"
+        
+        else:
+            #Shift at front of queue, process and set status to "pending"
+            print("Processing Shift at front of queue")
+            
+            #Process shift
+            
+            #Get TAs who have the desired skill set
+            ta_candidates = User().get_ta_candiates(skills)
+                
+            #Collect ta_candidates with matching availablility
+            available_tas = User.get_available_tas(Self, ta_candidates, start_time, end_time)
+                
+            #Out of these TAs who can make it factoring commute time 
+            eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id)
+            
+            #Collect all the skill documents and calculate their rarity
+            skill_rarity, all_skill_docs = User.skill_rankings(Self)
+                
+            #Sorts the available TAs according to skill_rarity, first in list = lowest uniquness
+            sorted_tas = User.ta_scores(Self, eligible_tas, all_skill_docs, skill_rarity)
+                
+            #Select the TA with the lowest uniqueness score
+            best_ta = sorted_tas[0][0] if sorted_tas else None
+            
+            #Set status to "pending"
+            status = "pending"
+            
+            #We need to return the shift_id here to use for approval
+            
+        print("Shift ID:", shift_id)
+        print("Best TA:", best_ta)
+            
+        return best_ta, status, shift_id
+    
+
+    
+    #Once this is working properly we can then finish the logic for each operation mode
+    #We dont need to handle operation modes where the TA is not shown before approval
+    def adjust_queue():
+        
+        #The shift with queue position 1 is the next shift to be processed
+        
+        #Collect all shifts with status "queued"
+        shift_queue = list(db.shifts.find({"status": "queued"}))
+        
+        print("Queued Shifts:", shift_queue)
+        
+        for shift in shift_queue:
+            #Collect queue position
+            queue_position = shift['queue_position']
+            
+            print("Queue Position:", queue_position)
+            
+            #Calculate new queue position
+            new_queue_position = queue_position - 1
+            
+            #If the current shift is at the front of the queue
+            if queue_position == 1:
+
+                #Check its operation mode
+                print("Checking Operation Mode")
+                
+                #Call approprate operation mode 
+                operation_mode = shift["operation_mode"]
+                
+                #Select random TA from eligible TAs, Admin must view TA before approval
+                if operation_mode == 1:
+                    print("Running Operation Mode 1")
+                    #Call operation Mode 1
+        
+                #Mode in which admin can select candidate based on a specific quota (TA information will have to be displayed)
+                elif operation_mode == 3:
+                    print("Running Operation Mode 3") 
+        
+                #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
+                elif operation_mode == 4:
+                    print("Running Operation Mode 4")
+                    #Call operation Mode 4
+                    best_ta, status, shift_id = User.operation_mode_4(shift["skills"], shift["start_time"], shift["end_time"], shift["floor"], shift["date"], shift["building"], shift["_id"], shift["status"])
+           
+                #Automatic mode, no Admin approval needed
+                elif operation_mode == 5:
+                    print("Running Operation Mode 5")
+                    
+                
+                #When we are adjusting the queue we shouldnt create a new document we shoudl edit the existing document
+                
+                #Find the shift with that shift_id
+                #Adjust queue position
+                #Set status to pending
+                db.shifts.update_one(
+                {"_id": shift["_id"]},
+                {"$set": {"queue_position": new_queue_position, "status": "pending"}}
+                )
+                
+                
+                
+            
+            #If the shift isnt at the front of the queue move it forward one position
+            else:
+                #Update queue position
+                db.shifts.update_one(
+                {"_id": shift["_id"]},
+                {"$set": {"queue_position": new_queue_position}}
+                )
+            
+    
+        return print("Queue Adjusted")
+            
+        
+        
+        
+        
+        
+        
+      
+    
+    
+    
     
     def get_user_shifts(user_id):
         
@@ -1011,7 +1160,11 @@ class User:
             })
         
         print(formatted_shifts)
+        
         return formatted_shifts
+    
+    
+    
             
         
     

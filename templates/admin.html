@@ -2,115 +2,178 @@
 
 {% block content %}
 
-<h1> Admin Interface </h1>
-    <div class = "card-wrapper">
+<div class = "page-header">
+    <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
+    <h1> Admin Interface </h1>
+</div>
 
-        <div class = "card">
 
-            <h1 class = "center"> Register New User </h1>
+<div class="set-mode-card">
+    <h3 class="card-title">Set Operation Mode</h3>
+    <form name="set_mode_form">
+        <label for="operation_mode">Select Operation Mode:</label>
+        <select name="operation_mode" name="operation_mode">
+            <option value="1">Random Selection of Available TAs</option>
+            <option value="2">Admin Approval (Pre TA Allocation)</option>
+            <option value="3">Admin Selects TA (By Quota)</option>
+            <option value="4">Admin Approval (Post TA Allocation)</option>
+            <option value="5">No Approval (Fully Automated)</option>
+        </select>
+        <button type="submit">Save Mode</button>
+        
+    </form>
+</div>
 
-            <!-- Form allowing the admin to create a users credentials -->
-            <form name="register_form">
+
+
+<div class="pending-shift-card">
+    <h2>Pending Shifts Awaiting Admin Approval</h2>
+        {% if pending_shifts %}
+            <!-- Shift Container -->
+            <form name="admin_approval_form"  method="POST">
+                <div class="shift-container">
+                    {% for shift in pending_shifts %}
+                        <div class="shift-item">
+                            <input type="checkbox" name="shift_ids" value="{{ shift.shift_id }}">
+                            <strong>Module Leader:</strong> {{ shift.ml_name }} | 
+                            <strong>Date:</strong> {{ shift.date }} |
+                            <strong>Start Time:</strong> {{ shift.start_time.strftime('%H:%M') }} |
+                            <strong>End Time:</strong> {{ shift.end_time.strftime('%H:%M') }} |
+                            <strong>Building:</strong> {{ shift.building_name }} |
+                            <strong>Room:</strong> {{ shift.room_name }} |
+                            <strong>Teaching Associate:</strong> {{ shift.ta_name }} |
+                        </div>
+                    {% endfor %}
+                </div>
                 
-                <!-- Label to input user name -->
-                <label for= "name">Name</label>
-                <input type= "text" name= "name" class="field" required>
-                
-                <!-- Label to input user email -->
-                <label for= "email">Email</label>
-                <input type= "email" name= "email" class="field" required>
-
-                <!-- Label to select the user role -->
-                <label for= "role">Role</label>
-                <select name="role" class="field" required>
-                    <option value="Teaching Associate">Teaching Associate</option>
-                    <option value="Module Leader">Module Leader</option>
-                    <option value="Admin">Admin</option>
-                </select>
-
-                <!-- Label to select the user password -->
-                <label for= "password">Password</label>
-                <input type= "password" name= "password" class="field" required>
-
-                 <!-- Displays error messages -->
-                <p class= "error error--hidden"> </p>
-
-                <!-- Button to submit the form -->
-                <input type= "submit" value = "Register" class= "btn">
-            
+                <!-- Buttons to approve or deny -->
+                <button type="submit" name="action" value="approve">Approve Selected</button>
+                <button type="submit" name="action" value="deny">Deny Selected</button>
             </form>
+        {% else %}
+            <p>No pending shifts.</p>
+        {% endif %}
+</div>
+    
 
-            <div class = "centre">
-                <a href = "/user/signout" class = "btn btn--secondary"> Sign Out </a>
+
+    <div class = "card-wrapper">
+        <div class="form-pair">
+            <div class = "card">
+                <h1 class = "card-title"> Register New User </h1>
+                <!-- Form allowing the admin to create a users credentials -->
+                <form name="register_form">
+                    <!-- Label to input user name -->
+                    <label for= "name">Name</label>
+                    <input type= "text" name= "name" class="field" required>
+                    <div>
+                        <!-- Label to input user email -->
+                        <label for= "email">Email</label>
+                        <input type= "email" name= "email" class="field" required>
+                    </div>
+                    <!-- Label to select the user role -->
+                    <div>
+                        <label for= "role">Role</label>
+                        <select name="role" class="field" required>
+                            <option value="Teaching Associate">Teaching Associate</option>
+                            <option value="Module Leader">Module Leader</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div>
+                        <!-- Label to select the user password -->
+                        <label for= "password">Password</label>
+                        <input type= "password" name= "password" class="field" required>
+                    </div>
+                    <!-- Displays error messages -->
+                    <p class= "error error--hidden"> </p>
+                    <!-- Button to submit the form -->
+                    <input type= "submit" value = "Register" class= "btn">
+                </form>
+
+
+                
+                
+                 <h3 class="card-title">Remove User</h3>
+                    <form name="remove_user_form">
+                        <label for="skills">Select a User to Delete:</label>
+                        <select name="user_dropdown"id="users_dropdown">
+                            <option>Select a user</option>
+                            {% for name in user_names %}
+                                <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type= "submit" value = "Remove From Database" class= "btn">    
+                    </form>       
+            </div>
+        </div>
+                
+                
+            
+        <div class="form-pair">
+                <div class="card">
+                    <h3 class="card-title">Add New Skill</h3>
+                    <form name="add_new_skill_form" method="post">
+                
+                        <label for="new_skill">Add a New Skill:</label>
+                        <input type= "text" id="new_skill" name= "new_skill" class="field" placeholder="Enter skill"required>
+                    
+                        <input type="submit" value="Add Skill" class="btn">
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Remove Skill</h3>
+                    <form name="admin_remove_skill_form" method="POST">
+                
+                        <label for="remove_skill">Select a Skill to Remove:</label>
+
+                        <select name="skill" id="skills">
+
+                            {% for skill in compsci_skills %}
+                            <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  
+                            {% endfor %}
+                        </select>
+                    
+                        <input type="submit" value="Remove Skill" class="btn">
+                    </form>
+                </div>
+
+            </div>
+            
+        <div class="form-pair">
+            <div class="card">
+                <h3 class="card-title">Add New Building</h3>
+                <form name="add_new_building_form" method="post">
+            
+                    <label for="new_building">Add a New Building:</label>
+                    <input type= "text" id="new_building" name= "new_building" class="field" placeholder="Enter Building"required>
+                    <label for="floors">Enter Number of Floors :</label>
+                    <input type="number" id="floors" name="floors" min="1" step="1" required pattern="\d+">
+
+
+                    <input type="submit" value="Add Building" class="btn">
+                </form>
             </div>
 
-            <body>
+            <div class="card">
+                <h3 class="card-title">Remove Building</h3>
+                <form name="remove_building_form" method="POST">
             
+                    <label for="remove_building">Select a Building to Remove:</label>
+
+                    <select name="building" id="buildings">
+
+                        {% for building in buildings %}
+                        <option value="{{ building['_id'] }}">{{ building['name'] }}</option>  
+                        {% endfor %}
+                    </select>
                 
-            <form name="remove_user_form">
-                <label for="skills">Select a User to Delete:</label>
-                <select name="user_dropdown"id="users_dropdown">
-                    <option>Select a user</option>
-                    {% for name in user_names %}
-                        <option value="{{ name }}">{{ name }}</option>
-                    {% endfor %}
-                </select>
-                <input type= "submit" value = "Remove From Database" class= "btn">
-            
-            </form>
-            
-            </body> 
-
-
-            <form name="add_new_skill_form" method="post">
+                    <input type="submit" value="Remove Building" class="btn">
+                </form>
+            </div>
         
-                <label for="new_skill">Add a New Skill:</label>
-                <input type= "text" id="new_skill" name= "new_skill" class="field" placeholder="Enter skill"required>
-            
-                <input type="submit" value="Add Skill" class="btn">
-            </form>
-
-
-            <form name="admin_remove_skill_form" method="POST">
-        
-                <label for="remove_skill">Select a Skill to Remove:</label>
-
-                <select name="skill" id="skills">
-
-                    {% for skill in compsci_skills %}
-                    <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>  
-                    {% endfor %}
-                </select>
-            
-                <input type="submit" value="Remove Skill" class="btn">
-            </form>
-
-
-            <form name="add_new_building_form" method="post">
-        
-                <label for="new_building">Add a New Building:</label>
-                <input type= "text" id="new_building" name= "new_building" class="field" placeholder="Enter Building"required>
-                <label for="floors">Enter Number of Floors :</label>
-                <input type="number" id="floors" name="floors" min="1" step="1" required pattern="\d+">
-
-
-                <input type="submit" value="Add Building" class="btn">
-            </form>
-
-
-            <form name="remove_building_form" method="POST">
-        
-                <label for="remove_building">Select a Building to Remove:</label>
-
-                <select name="building" id="buildings">
-
-                    {% for building in buildings %}
-                    <option value="{{ building['_id'] }}">{{ building['name'] }}</option>  
-                    {% endfor %}
-                </select>
-            
-                <input type="submit" value="Remove Building" class="btn">
-            </form>
+        </div>
 
 
             
@@ -127,19 +190,8 @@
                 </div>
             </div>
 
-
-            <form name="set_mode_form">
-                <label for="operation_mode">Select Operation Mode:</label>
-                <select name="operation_mode" name="operation_mode">
-                    <option value="1">Random Selection of Available TAs</option>
-                    <option value="2">Admin Approval (Pre TA Allocation)</option>
-                    <option value="3">Admin Selects TA (By Quota)</option>
-                    <option value="4">Admin Approval (Post TA Allocation)</option>
-                    <option value="5">No Approval (Fully Automated)</option>
-                </select>
-                <button type="submit">Save Mode</button>
-                
-            </form>
+            
+    
 
 
 
@@ -160,33 +212,7 @@
 </div>
 
 
-<h2>Pending Shifts Awaiting Admin Approval</h2>
 
-    {% if pending_shifts %}
-        <!-- Shift Container -->
-        <form name="admin_approval_form"  method="POST">
-            <div class="shift-container">
-                {% for shift in pending_shifts %}
-                    <div class="shift-item">
-                        <input type="checkbox" name="shift_ids" value="{{ shift.shift_id }}">
-                        <strong>Module Leader:</strong> {{ shift.ml_name }} | 
-                        <strong>Date:</strong> {{ shift.date }} |
-                        <strong>Start Time:</strong> {{ shift.start_time.strftime('%H:%M') }} |
-                        <strong>End Time:</strong> {{ shift.end_time.strftime('%H:%M') }} |
-                        <strong>Building:</strong> {{ shift.building_name }} |
-                        <strong>Room:</strong> {{ shift.room_name }} |
-                        <strong>Teaching Associate:</strong> {{ shift.ta_name }} |
-                    </div>
-                {% endfor %}
-            </div>
-            
-            <!-- Buttons to approve or deny -->
-            <button type="submit" name="action" value="approve">Approve Selected</button>
-            <button type="submit" name="action" value="deny">Deny Selected</button>
-        </form>
-    {% else %}
-        <p>No pending shifts.</p>
-    {% endif %}
 
 
 
