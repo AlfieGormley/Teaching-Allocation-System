@@ -876,16 +876,23 @@ class User:
                 print("Running Operation Mode 3")
             
             elif action == "approve" and shift_info["operation_mode"] == 4:
+                
+                #Assigns TA and approves the shift
+                print("Approving Shift and Assigning TA")
+                User.approve_and_assign_ta(Self, shift_info["shift_id"], shift_info["ta_id"], shift_info["status"])
+                
+                
+                #We should then run operation mode 4 on the shift at the front of the queue
+                
+                
                 print("Running Operation Mode 4!")
                 #Call operation mode 4
                 best_ta, status, shift_id = User.operation_mode_4(shift_info["skills"], shift_info["start_time"], shift_info["end_time"], shift_info["floor"], shift_info["date"], shift_info["building_id"], shift_info["shift_id"], shift_info["status"])
                 
-                print("Status before Approval:", status)
-                #status = "approved"
                 
-                #Assigns TA and approves the shift
-                print("Approving Shift and Assigning TA")
-                User.approve_and_assign_ta(Self, shift_id, best_ta, status)
+                
+                
+                
                 
             
             elif action == "approve" and shift_info["operation_mode"] == 5:
@@ -1006,13 +1013,14 @@ class User:
             best_ta = sorted_tas[0][0] if sorted_tas else None
             
             
-        
+        #Currently the shift first in the queue is entering this statement which is wrong        
             
         elif status == "queued":
             #Shift has been queued waiting for admin to accept approve a "pending" shift
             print("Shift has been queued")
             
             #Check if shift is first in the queue
+            
             
             #Can't calculate the best TA yet
             best_ta = "Not Yet Assigned"
@@ -1079,6 +1087,8 @@ class User:
                 #Check its operation mode
                 print("Checking Operation Mode")
                 
+                print("Processing shift at the front of the queue")
+                
                 #Call approprate operation mode 
                 operation_mode = shift["operation_mode"]
                 
@@ -1102,14 +1112,12 @@ class User:
                     print("Running Operation Mode 5")
                     
                 
-                #When we are adjusting the queue we shouldnt create a new document we shoudl edit the existing document
                 
-                #Find the shift with that shift_id
-                #Adjust queue position
-                #Set status to pending
+                print("Best TA Just Before Update", best_ta)
+                
                 db.shifts.update_one(
                 {"_id": shift["_id"]},
-                {"$set": {"queue_position": new_queue_position, "status": "pending"}}
+                {"$set": {"queue_position": new_queue_position, "status": "pending", "ta_id": best_ta}}
                 )
                 
                 
