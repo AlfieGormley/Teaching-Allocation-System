@@ -975,6 +975,7 @@ class User:
     #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
     #Function for approving/denying shifts in operation mode 4
     
+    
     #NEED TO ENSURE THE FIRST SHIFT IN THE QUEUE IS GETTING PROCESSED
     def operation_mode_4(skills, start_time, end_time, floor, date, building_id, shift_id, status):
         
@@ -983,7 +984,19 @@ class User:
             shift_id = uuid.uuid4().hex
             print("Shift_id:", shift_id)
         
+        
         print("Processing shift id:", shift_id)
+        
+        shift_doc = db.shifts.find_one({"_id": shift_id}, {"queue_position": 1})
+        
+        if shift_doc and "queue_position" in shift_doc:
+            queue_position = shift_doc["queue_position"]
+            print("Queue Position:", queue_position, "For shift:", shift_id)
+        else:
+            print("Shift not found or queue_position missing.")
+            queue_position = 0
+        
+        
         
         #Check if status is pending
         if status == "pending":
@@ -1013,23 +1026,13 @@ class User:
             best_ta = sorted_tas[0][0] if sorted_tas else None
             
             
-        #Currently the shift first in the queue is entering this statement which is wrong        
+        #Currently the shift first in the queue is entering this statement which is wrong   
+        # Maybe lookup the queue position of the shift, if it is 1 then its at the front     
             
-        elif status == "queued":
+        elif status == "queued" and queue_position == 1:
+            
             #Shift has been queued waiting for admin to accept approve a "pending" shift
-            print("Shift has been queued")
-            
-            #Check if shift is first in the queue
-            
-            
-            #Can't calculate the best TA yet
-            best_ta = "Not Yet Assigned"
-        
-        else:
-            #Shift at front of queue, process and set status to "pending"
-            print("Processing Shift at front of queue")
-            
-            #Process shift
+            print("Processing shift at the front of the queue")
             
             #Get TAs who have the desired skill set
             ta_candidates = User().get_ta_candiates(skills)
@@ -1040,6 +1043,8 @@ class User:
             #Out of these TAs who can make it factoring commute time 
             eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id)
             
+            print("Eligible TAs:", eligible_tas)
+            
             #Collect all the skill documents and calculate their rarity
             skill_rarity, all_skill_docs = User.skill_rankings(Self)
                 
@@ -1049,10 +1054,17 @@ class User:
             #Select the TA with the lowest uniqueness score
             best_ta = sorted_tas[0][0] if sorted_tas else None
             
-            #Set status to "pending"
-            status = "pending"
+            print("Best TA:", best_ta)
             
-            #We need to return the shift_id here to use for approval
+            
+        #Shift has been queued waiting for admin to accept approve a "pending" shift
+        else:
+            #Shift at front of queue, process and set status to "pending"
+            print("Shift is queued")
+            
+            #Can't calculate the best TA yet
+            best_ta = "Not Yet Assigned"
+            
             
         print("Shift ID:", shift_id)
         print("Best TA:", best_ta)
@@ -1103,16 +1115,16 @@ class User:
         
                 #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
                 elif operation_mode == 4:
-                    print("Running Operation Mode 4")
+                    print("Running Operation Mode 4 in the queue adjustment phase")
                     #Call operation Mode 4
                     best_ta, status, shift_id = User.operation_mode_4(shift["skills"], shift["start_time"], shift["end_time"], shift["floor"], shift["date"], shift["building"], shift["_id"], shift["status"])
-           
+                    
+                    
                 #Automatic mode, no Admin approval needed
                 elif operation_mode == 5:
                     print("Running Operation Mode 5")
                     
-                
-                
+            
                 print("Best TA Just Before Update", best_ta)
                 
                 db.shifts.update_one(
