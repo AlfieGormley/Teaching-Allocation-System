@@ -525,36 +525,15 @@ class User:
         
         
         
+    def to_datetime_if_needed(start_time, date):
+        if isinstance(start_time, datetime):
+            return start_time
+        combined = f"{date} {start_time}"
+        dt = datetime.strptime(combined, "%Y-%m-%d %H:%M")
+        #dt = pytz.UTC.localize(dt)
+        return dt
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     
     
@@ -563,6 +542,9 @@ class User:
     
     #Returns eligible TAs whose schedule allows time to commute  
     def filter_available_tas(self, floor, start_time, available_tas, date, building):
+        
+        #Convert if neccessary
+        start_time = User.to_datetime_if_needed(start_time, date)
         
         #List to store eligible_tas
         eligible_tas = []
@@ -598,10 +580,24 @@ class User:
                 # Convert commute_time to timedelta
                 commute_duration = timedelta(seconds=commute_time)
                 
+                print(type(scheduled_end_time))
+                print(type(start_time))     #This is a string, we need to check if not a datetime.datetime convert it
+                print(type(commute_duration))
+                
+                
+                    
+                
+                print(type(scheduled_end_time))
+                print(type(start_time)) #This is a string, we need to check if not a datetime.datetime convert it
+                print("Start Time: ", start_time)
+                print(type(commute_duration))
+                
+                
                 #If the TA can make it factoring commute time
                 if scheduled_end_time + commute_duration <= start_time:
                     print("TA can make the shift")
-                
+                    
+    
                 #If the TA can't make it factoring commute time
                 else:
                     print("TA can't make the shift")
