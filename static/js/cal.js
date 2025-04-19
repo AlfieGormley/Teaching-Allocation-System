@@ -1,5 +1,3 @@
-// script.js
-
 
 
 // Initialize global lookup arrays/objects for availability:
@@ -23,10 +21,6 @@ if (typeof availability_data !== "undefined") {
 
     });
 }
-
-
-
-
 
 // Initialize global lookup arrays/objects for shifts:
 let shiftDates = [];
@@ -221,10 +215,7 @@ function showCalendar(month, year) {
                 //Sets the date number of the cell
 				cell.innerHTML = "<span>" + date + "</span";
 
-                
-
-                
-
+            
                 // Format full date as YYYY-MM-DD. Note that month is zero-indexed in JS Date, so add 1.
                 let fullDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
 
@@ -410,7 +401,7 @@ function showManageEventsButton(event, date) {
     if (!button) {
         button = document.createElement("button");
         button.id = "manage-events-button";
-        button.textContent = "Manage Events";
+        button.textContent = "View Events";
         button.style.position = "absolute";
         button.style.padding = "8px";
         button.style.background = "#007bff";
@@ -426,7 +417,11 @@ function showManageEventsButton(event, date) {
     button.style.display = "block";
 
     button.onclick = function () {
-        open_manage_availability_form(date);
+
+		//Uncomment to get ta working again
+        //_manage_availability_form(date);
+		view_schedule_form(date)
+
     };
 
     document.addEventListener("click", function () {
@@ -435,8 +430,75 @@ function showManageEventsButton(event, date) {
 }
 
 
+function view_schedule_form(date) {
 
-function open_manage_availability_form(date) {
+	//Get the date
+    document.getElementById("schedule_form_date").value = date;
+
+	console.log("formatted_shifts", typeof(formatted_shifts));
+
+	//Finds the container for the availaibility_list and Clears previous availability for when a new date is selected
+	const schedule_list = document.getElementById("schedule_list");
+    schedule_list.innerHTML = ""; 
+
+	//Retrieves schedule for the given date
+	const filtered_schedule = formatted_shifts.filter(slot => slot.date === date);
+	
+	
+
+	if (filtered_schedule.length > 0) {
+
+		//Iterates over each slot in the array
+		filtered_schedule.forEach(slot => {
+
+			//Creates a new paragraph element for each availability slot
+            const slot_element = document.createElement("div");
+			slot_element.classList.add("schedule-slot");
+
+			const slot_text = document.createElement("p");
+			slot_text.classList.add("schedule-text");
+
+
+			//The text content inside the slot element
+			slot_text.innerHTML = 
+				`<strong>Time:</strong> ${slot.start_time} - ${slot.end_time} ` +
+				`<strong>Floor:</strong> ${slot.floor} ` +
+				`<strong>Room:</strong> ${slot.room} ` +
+				`<strong>Building:</strong> ${slot.building_name} ` +
+				`<strong>TA:</strong> ${slot.ta_name} ` +
+				`<strong>Status:</strong> ${slot.status} `;
+
+
+			//Button for cancelling the shift
+			const drop_button = document.createElement("button");
+			drop_button.classList.add("cancel-button");
+			drop_button.textContent = "Cancel Shift";
+
+			//Event listener for drop_button
+			drop_button.addEventListener("click", () => {
+
+				//This is logging the correct _id in the console
+				console.log(slot.shift_id)
+
+			})
+
+			drop_button.setAttribute("data-id", slot.shift_id);
+			slot_element.appendChild(slot_text);
+			slot_element.appendChild(drop_button);
+
+			//Adds the slot element to availability_list
+            schedule_list.appendChild(slot_element);
+
+        });
+	} else {
+		schedule_list.innerHTML = "<p>You have no availability set for this date.</p>";
+	}
+
+}
+
+
+
+function _manage_availability_form(date) {
     document.getElementById("manage_availability_date").value = date;
 	
 	console.log("availability_data:", typeof(availability_data));

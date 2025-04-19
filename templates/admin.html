@@ -8,20 +8,15 @@
 </div>
 
 
-<div class="set-mode-card">
-    <h3 class="card-title">Set Operation Mode</h3>
-    <form name="set_mode_form">
-        <label for="operation_mode">Select Operation Mode:</label>
-        <select name="operation_mode" name="operation_mode">
-            <option value="1">Random Selection of Available TAs</option>
-            <option value="2">Admin Approval (Pre TA Allocation)</option>
-            <option value="3">Admin Selects TA (By Quota)</option>
-            <option value="4">Admin Approval (Post TA Allocation)</option>
-            <option value="5">No Approval (Fully Automated)</option>
-        </select>
-        <button type="submit">Save Mode</button>
-        
-    </form>
+<div id="operation-mode-buttons">
+    {% for mode in operation_modes %}
+        <button 
+            class="operation-mode-button {{ 'active' if mode.active else '' }}" 
+            data-id="{{ mode._id }}"
+        >
+            Operation Mode {{ mode.operation_mode }}
+        </button>
+    {% endfor %}
 </div>
 
 
@@ -85,11 +80,29 @@
                         <label for= "password">Password</label>
                         <input type= "password" name= "password" class="field" required>
                     </div>
+
+                    <div>
+                        <!-- New number input for max hours per week -->
+                        <label for="max_hours">Max Hours Per Week</label>
+                        <input 
+                            type="number" 
+                            name="max_hours" 
+                            class="field" 
+                            min="0" 
+                            max="100" 
+                            step="1" 
+                            placeholder="e.g. 10" 
+                            required
+                        >
+                    </div>
+
+
                     <!-- Displays error messages -->
                     <p class= "error error--hidden"> </p>
                     <!-- Button to submit the form -->
                     <input type= "submit" value = "Register" class= "btn">
                 </form>
+
 
 
                 

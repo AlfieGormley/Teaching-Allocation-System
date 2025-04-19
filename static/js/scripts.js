@@ -574,6 +574,68 @@ $(document).ready(function() {
 
 
 
+//This is used to send the _id of the schedule slot we want to drop to the backend
+
+$(document).ready(function() {
+
+    //Event listener for the drop button
+    $(document).on("click", ".cancel-button", function(e) {
+
+        e.preventDefault(); // Prevent page from refreshing
+
+        var slot_id = $(this).data("id"); // Get the _id from data attribute
+        
+        $.ajax({
+            url: "/user/cancel_shift", 
+            type: "POST",
+            data: { _id: slot_id }, // Send the _id to the backend
+            dataType: "json",
+
+            success: function(resp) {
+                console.log(resp);
+                $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
+            },
+
+            error: function(resp) {
+                console.log(resp);
+            }
+
+        });
+    });
+});
+
+
+
+$(document).ready(function() {
+
+    //Event listener for the drop button
+    $(document).on("click", ".operation-mode-button", function(e) {
+
+        e.preventDefault(); // Prevent page from refreshing
+
+        //Get the operation mode of the button clicked
+        const data = $(this).data("id");
+        
+        $.ajax({
+            url: "/user/change_operation_mode", 
+            type: "POST",
+            data: data, // Send the operation mode to backend
+            dataType: "json",
+
+            success: function(resp) {
+                console.log(resp);
+                $error.text("Successful Update!").removeClass("error--hidden").addClass("success");
+            },
+
+            error: function(resp) {
+                console.log(resp);
+            }
+
+        });
+    });
+});
+
+
 
 //Finds the form with name:add_new_building_form, when submitted it run this function
 $("form[name='add_new_building_form']").submit(function(e) {

@@ -93,6 +93,13 @@ def ta():
     #Format Shift data to send to front end
     formatted_shifts = []
     for shift in shift_docs:
+        
+        status = shift.get('status')
+        
+        if status == "cancelled":
+            print("Status Cancelled")
+            continue
+        
         formatted_shifts.append({
             "shift_id": shift["_id"],
             "ta_id": shift["ta_id"],
@@ -106,6 +113,9 @@ def ta():
             "description": shift["description"],
             "status": shift["status"]
             })
+    
+    #Remove cancelled shifts from formatted_shifts
+    
     
     
     return render_template('ta.html', skills=skills, availability=availability, availability_data=availability_data, compsci_skills=compsci_skills, role=role, formatted_shifts=formatted_shifts)
@@ -136,15 +146,37 @@ def ml():
     #Format Shift data to send to front end
     formatted_shifts = []
     for shift in shift_docs:
+        
+        status = shift.get('status')
+        
+        if status == "cancelled":
+            print("Status Cancelled")
+            continue
+        
+        
+        #Get building name
+        building_name = ""
+        if "building" in shift:
+            building_doc = db.buildings.find_one({"_id": shift["building"]})
+            building_name = building_doc.get("name") if building_doc else "Unknown Building"
+
+        #Get TA name
+        ta_name = ""
+        if "ta_id" in shift:
+            ta_doc = db.users.find_one({"_id": shift["ta_id"]})
+            ta_name = ta_doc.get("name") if ta_doc else "Unknown TA"
+        
         formatted_shifts.append({
             "shift_id": shift["_id"],
             "ta_id": shift["ta_id"],
+            "ta_name": ta_name,
             "ml_id": shift["ml_id"],
             "date": shift["date"],
             "start_time": shift["start_time"].strftime("%H:%M"),
             "end_time": shift["end_time"].strftime("%H:%M"),
             "room": shift["room"],
             "building": shift["building"],
+            "building_name": building_name,
             "floor": shift["floor"],
             "description": shift["description"],
             "status": shift["status"]
@@ -152,10 +184,13 @@ def ml():
     
     print(formatted_shifts)
     
+    #Send shifts specific to that user
     
     
     
-    #Send approved shifts with ml_id = user_id
+    
+    
+
     
     
     
@@ -164,6 +199,8 @@ def ml():
 @app.route('/admin/')
 @login_required(role="Admin")
 def admin():
+    
+    operation_modes = list(db.operation_mode.find())
     
     #Query shifts collection for pending shifts
     pending_shift_docs = db.shifts.find({"status": "pending"})
@@ -236,7 +273,7 @@ def admin():
     
     
 
-    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings, pending_shifts=pending_shifts)
+    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings, pending_shifts=pending_shifts, operation_modes=operation_modes)
 
 @app.route('/unauthorized/')
 def unauthorized():

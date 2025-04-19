@@ -8,13 +8,6 @@
 </div>
 
 
-<form name="change_password_form" method="post">
-        
-    <label for="new_password">New Password:</label>
-    <input type= "password" name= "new_password" class="field" required>
-
-    <input type="submit" value="Change Password">
-</form>
 
 
 <div class="container-calendar">
@@ -67,6 +60,33 @@
 
 
 
+
+
+
+<div class="schedule-container">
+    <h2> Shifts For Selected date: </h2>
+        <form id="schedule_form_content">
+
+            <label for="schedule_date">Date:</label>
+            <input type="text" id="schedule_form_date" name="schedule_form_date" readonly>
+
+            <div name="schedule_list" id="schedule_list"></div>
+        </form>
+</div>
+
+
+<div class="change-password-container">
+    <h3> Change Password </h3>
+        <form name="change_password_form" method="post">
+                
+            <label for="new_password">New Password:</label>
+            <input type= "password" name= "new_password" class="field" required>
+
+            <input type="submit" value="Change Password">
+        </form>
+</div>
+
+
 <!-- NEED TO MAKE CERTAIN THINGS REQUIRED FOR THE FORM -->
 
     <div id="request_support_form" class="modal">
@@ -80,7 +100,7 @@
                 <input type="text" id="availability_date" name="availability_date" readonly>
 
                 <label for="skills">Required Skills:</label>
-                <select name="skills[]" id="skills" multiple>
+                <select name="skills[]" id="skills" multiple required>
                     {% for skill in compsci_skills %}
                         <option value="{{ skill['_id'] }}">{{ skill['name'] }}</option>
                     {% endfor %}
@@ -89,14 +109,14 @@
                 
 
                 <label for="startTime">Start Time:</label>
-                <input type="time" id="start_time" name="start_time">
+                <input type="time" id="start_time" name="start_time" required>
 
                 <label for="endTime">End Time:</label>
-                <input type="time" id="end_time" name="end_time">
+                <input type="time" id="end_time" name="end_time" required>
 
                 <label for="select_building">Select Building:</label>
 
-                <select name="building" id="buildings">
+                <select name="building" id="buildings" required>
 
                     <option value="" disabled selected>Select a Building</option>
                     {% for building in buildings %}
@@ -106,12 +126,12 @@
                 </select>
 
                 <label for ="select_floor">Select Floor: </label>
-                <select name = "floor" id = "floors">
+                <select name = "floor" id = "floors" required>
 
                 </select>
 
                 <label for="room">Enter Room:</label>
-                <input type="text" id="room" name="room">
+                <input type="text" id="room" name="room" required>
 
                 <label for="description">Additional Information for TA:</label>
                 <textarea id="description" name="description" rows="4" cols="30" placeholder="Additional details about the lesson..."></textarea>
@@ -123,20 +143,17 @@
         </div>
     </div>
 
-    <body>
-        <h1>Shift Data</h1>
-
-        {% if formatted_shifts %}
-            <ul>
-                {% for s in formatted_shifts %}
-                    <li>Shift ID: {{ s.shift_id }} | Date: {{ s.date }} | Status: {{ s.status }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No shift data found.</p>
-        {% endif %}
-
-    </body>
+            <div>
+                {% if formatted_shifts %}
+                    <ul>
+                        {% for s in formatted_shifts %}
+                            <li>Shift ID: {{ s.shift_id }} | Date: {{ s.date }} | Status: {{ s.status }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No shift data found.</p>
+                {% endif %}
+            </div>
 
 
 

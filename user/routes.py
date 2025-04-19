@@ -108,7 +108,16 @@ def manage_pending_shift():
     #print("Action:", action)
 
     return User.manage_pending_shift()
+
+@app.route('/user/cancel_shift', methods=['POST'])
+def cancel_shift():
     
+    return User.cancel_shift()
+    
+@app.route('/user/change_operation_mode', methods=['POST'])
+def change_operation_mode():
+
+    return User.change_operation_mode()
     
     
     

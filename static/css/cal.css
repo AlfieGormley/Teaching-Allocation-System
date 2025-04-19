@@ -16,16 +16,52 @@ body {
 .container-calendar {
 	background: #ffffff;
 	padding: 30px;
-	max-width: 900px;
-	margin: 0 auto;
-	
+    margin-left: 50px;
+    top: 131.5px;
+    left: 100px;
+    margin-top: 52px;
+
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
 	border: 1px solid #ccc; /* Add border only around the calendar */
 	display: block;
-	height: auto; /* Ensure it adapts to content height */
+    width: 42.5%;
+    height: 529px;
+    /*position: absolute;*/
 	
-	
+}
+
+/* Calendar container */
+.change-password-container {
+	background: #ffffff;
+	padding: 30px;
+    margin-left: 20px;
+    margin-top: 40px;
     
+    left: 100px;
+
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+	border: 1px solid #ccc; /* Add border only around the calendar */
+	display: block;
+    width: 20.5%;
+    height: 200px;
+    /*position: absolute;*/
+	
+}
+
+.schedule-container {
+	background: #ffffff;
+	padding: 30px;
+	max-width: 1000px;
+    top: 131.5px;
+    right: 50px;
+    margin-right: 10px;
+    position: absolute;
+    width: 42.5%;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+	border: 1px solid #ccc; /* Add border only around the calendar */
+	display: block;
+	height: 529px; /* Ensure it adapts to content height */
+	
 }
 
 /* Event section styling */
@@ -291,6 +327,19 @@ body {
     background-color: #e60000; /* Darker red on hover */
 }
 
+/* Style the Drop button */
+.cancel-button {
+    padding: 5px 10px; /* Adds padding to the button */
+    background-color: #ff4d4d; /* Red background color */
+    color: white; /* White text color */
+    border: none;
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer;
+}
+
+.cancel-button:hover {
+    background-color: #e60000; /* Darker red on hover */
+}
 
 
 /* FOR ADMIN SHIFT APPROVAL BOX */
@@ -423,6 +472,28 @@ body {
     align-items: flex-start; /* Align items at the top (default behavior) */
     height: 100vh; /* Full viewport height */
     padding-top: 33.33vh; /* Move the login form down by about one-third of the viewport height */
+}
+
+
+.operation-mode-button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    background-color: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.operation-mode-button.active {
+    background-color: #ff3b3b; /* Bright red */
+    color: white;
+    font-weight: bold;
+}
+
+.operation-mode-button:hover {
+    background-color: #ddd;
 }
 
 
