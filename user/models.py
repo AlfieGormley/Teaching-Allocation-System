@@ -4,7 +4,7 @@ from passlib.hash import pbkdf2_sha256
 from app import db
 import uuid
 from datetime import datetime
-from datetime import timedelta
+from datetime import timedelta, timezone
 import pytz
 from collections import defaultdict
 import random
@@ -526,10 +526,10 @@ class User:
         
         
         
-    def to_datetime_if_needed(start_time, date):
-        if isinstance(start_time, datetime):
-            return start_time
-        combined = f"{date} {start_time}"
+    def to_datetime_if_needed(time, date):
+        if isinstance(time, datetime):
+            return time
+        combined = f"{date} {time}"
         dt = datetime.strptime(combined, "%Y-%m-%d %H:%M")
         #dt = pytz.UTC.localize(dt)
         return dt
@@ -551,6 +551,7 @@ class User:
         
         #Convert if neccessary
         start_time = User.to_datetime_if_needed(start_time, date)
+        end_time = User.to_datetime_if_needed(end_time, date)
         
         #List to store eligible_tas
         eligible_tas = []
@@ -635,21 +636,22 @@ class User:
     
     def get_week_boundary(start_time):
         
+        # Ensure datetime is in UTC and reset time to 00:00:00
+        start_time = start_time.astimezone(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        
         #Calculate Monday of the same week
         start_of_week = start_time - timedelta(days=start_time.weekday())
         
         #End of week: Sunday at 23:59:59.999999
-        end_of_week = start_of_week + timedelta(days=7) - timedelta(microseconds=1)
+        end_of_week = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59, microseconds=999999)
         
         return start_of_week, end_of_week
         
     
     
-    def hour_checker(eligible_tas, start_time):
+    def hour_checker(eligible_tas, start_time, end_time):
         
         still_eligible = []
-        
-        #Calculate the duration of the shift (end time - start time)
         
         #Calculate boundary
         start_of_week, end_of_week = User.get_week_boundary(start_time)
@@ -657,7 +659,12 @@ class User:
         print("Monday:", start_of_week)
         print("Sunday:", end_of_week )
         
+        #Start of week and end of week should be iso dates like in the database datetime.datetime localised
         
+        
+        #Calculate the duration of the new shift in hours
+        new_shift_duration = (end_time - start_time).total_seconds() / 3600
+
         #Do this for each eligible_ta:
         for ta_id in eligible_tas:
             
@@ -668,30 +675,46 @@ class User:
             if user:
                 
                 #Collect that users max weekly hours:
-                max_weekly_hours = user.get('max_weekly_hours')
+                max_weekly_hours = float(user.get('max_weekly_hours'))
+                
                 print(f"Max Weekly Hours : {max_weekly_hours}")
+                
+                
             
-            #How do we know where the week starts/ends
+                weekly_shifts = db.shifts.find({
+                    "ta_id": ta_id,
+                    "status": "approved",
+                    "start_time": { "$gte": start_of_week, "$lte": end_of_week }
+                })
+                
+                print("Weekly Shifts", weekly_shifts)
+
+                total_weekly_hours = 0.0
+                for shift in weekly_shifts:
+                    shift_start = shift["start_time"]
+                    shift_end = shift["end_time"]
+
+                    # Calculate shift duration
+                    duration_hours = (shift_end - shift_start).total_seconds() / 3600
+                    print("Duration Hours:", duration_hours)
+                    total_weekly_hours += duration_hours
+                    
+                print("total_weekly_hours type:", type(total_weekly_hours))
+                print("max_weekly_hours type:", type(max_weekly_hours))
+                print("new_shift_duration type:", type(new_shift_duration))
+                
+                print("total_weekly_hours :", total_weekly_hours)
+                print("max_weekly_hours :", max_weekly_hours)
+                print("new_shift_duration :", new_shift_duration)
+                
+            # Check if adding this new shift would exceed their max
+            if total_weekly_hours + new_shift_duration <= max_weekly_hours:
+                still_eligible.append(ta_id)
+            else:
+                print("TA exceeds weekly limit – skipping.")
 
             
-            #Collect all that users scheduled shifts for that week
-            
-            #Set total_weekly_hours = 0
-            
-            #For each shift: 
-            
-                #calculate its duration (end time - start time)
-                
-                #total_weekly_hours = duration + total_weekly_hours
-                
-            #if total_weekly_hours <= ta_max_weekly_hours
-
-                #check next ta
-            
-            #else:
-                #remove ta from eligible tas
-            
-        return
+        return still_eligible
     
     #Considerations, if we cancel a pending shift we have to adjust the queue
     #We need to remove cancelled shifts from the form and not display them
@@ -726,11 +749,27 @@ class User:
         
     def deny_request(self, shift_id, status):
         
+        #When a shift is rejected due to having no eligigble TAs its status is "queued"
+        #We should still adjust the queue
+        print("Status before the rejection:", status)
+        
+        
         #Search shift_id and update relevent fields
         db.shifts.update_one(
             {"_id": shift_id},  
             {"$set": {"status": "rejected"}}
         )
+    
+        
+        shift = db.shifts.find_one({ "_id": shift_id })
+        
+        if shift:
+            test_shift_status = shift.get('status')
+            print(f"Shift status of rejected shift: {test_shift_status}")
+        else:
+            print("Shift not found.")
+        
+        #Here the status is rejected
         
         #Adjust the Queue
         if status == "pending":
@@ -738,7 +777,11 @@ class User:
             print("Adjusting queue")
             User.adjust_queue()
             
+        
+            
         print(f"Shift {shift_id} has been rejected.") 
+        
+        return test_shift_status
     
     def exctract_request_form(self):
         
@@ -756,8 +799,12 @@ class User:
     
     def set_operation_mode():
         
+        
+        
         operation_mode = request.form.get("operation_mode")
         print("Operation Mode:", operation_mode)
+        
+        
         
         #(0) If collection is empty/doesnt exists
         if db.operation_mode.count_documents({}) == 0:
@@ -766,7 +813,8 @@ class User:
             db.operation_mode.insert_one({
                 "_id": uuid.uuid4().hex,
                 "operation_mode": operation_mode,
-                "active": True
+                "active": True,
+                "description": ""
             })
             return jsonify(success=True, message=f"Operation mode {operation_mode} is now active")
 
@@ -794,22 +842,12 @@ class User:
             db.operation_mode.insert_one({
                 "_id": uuid.uuid4().hex,
                 "operation_mode": operation_mode,
-                "active": True
+                "active": True,
+                "description": ""
             })
         
 
         return jsonify(success=True, message=f"Operation mode {operation_mode} is now active")
-    
-    
-    #NOTES ON THE ALGORITHM:
-    
-    #(1) - Consider Maxmium/Minumum Work Quotas
-    
-    #(4) - If no TAs available: 
-    #           Store list of close candidates who could be considered if the quota isnt matched
-    
-    #(5) - Maybe on ML form, if no available_tas, what degree of lateness would be acceptable?
-    
     
     
     def request_support(self):
@@ -837,7 +875,6 @@ class User:
         
         #if a queue is needed
         if is_queued_mode:
-
             # Get queue position (count shifts in queue)
             queue_position = db.shifts.count_documents({"status": {"$in": ["pending", "queued"]}}) 
             status = "pending" if queue_position == 0 else "queued"
@@ -996,6 +1033,41 @@ class User:
         return jsonify("Form Data Recived:")
     
     
+    
+    def eligible_tas(skills, start_time, end_time, floor, date, building_id):
+        
+        start_time_iso , end_time_iso = User.convert_to_iso(Self, date, start_time, end_time)
+        
+        if floor == "G":
+            
+            #Collect TAs with mobility issues matching the desired skill set
+            ta_candidates = User.get_disabled_ta_candidates(Self, skills)
+            
+            if not ta_candidates:
+                ta_candidates = User().get_ta_candiates(skills)
+                
+            
+        else:
+            #Get TAs who have the desired skill set
+            ta_candidates = User().get_ta_candiates(skills)
+            
+        #Collect ta_candidates with matching availablility
+        available_tas = User.get_available_tas(Self, ta_candidates, start_time_iso, end_time_iso)
+        print("Available_TAS:", available_tas)
+                
+        #Out of these TAs who can make it factoring commute time 
+        eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id, end_time)
+        print("Eligible_TAS:", eligible_tas)
+        
+        still_eligible = User.hour_checker(eligible_tas, start_time_iso, end_time_iso)
+        
+        
+            
+        return still_eligible
+    
+    
+    
+    
     #Select random TA from eligible TAs, Admin must view TA before approval
     #Function for approving/denying shifts in operation mode 1
     def operation_mode_1(skills, start_time, end_time, floor, date, building_id, shift_id, status):
@@ -1004,7 +1076,6 @@ class User:
             print("Shift ID is not yet assigned")
             shift_id = uuid.uuid4().hex
             print("Shift_id:", shift_id)
-        
         
         print("Processing shift id:", shift_id)
         
@@ -1017,23 +1088,11 @@ class User:
             print("Shift not found or queue_position missing.")
             queue_position = 0
             
-        start_time_iso , end_time_iso = User.convert_to_iso(Self, date, start_time, end_time)
         
         #Check if status is pending
         if status == "pending":
         
-            #Get TAs who have the desired skill set
-            ta_candidates = User().get_ta_candiates(skills)
-            
-            #Collect ta_candidates with matching availablility
-            available_tas = User.get_available_tas(Self, ta_candidates, start_time_iso, end_time_iso)
-            print("Available_TAS:", available_tas)
-                
-            #Out of these TAs who can make it factoring commute time 
-            eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id, end_time)
-            print("Eligible_TAS:", eligible_tas)
-            
-            User.hour_checker(eligible_tas, start_time_iso)
+            eligible_tas = User.eligible_tas(skills, start_time, end_time, floor, date, building_id)
                 
             #Randomly select a candidate
             best_ta = random.choice(eligible_tas)
@@ -1044,17 +1103,7 @@ class User:
             #Shift has been queued waiting for admin to accept approve a "pending" shift
             print("Processing shift at the front of the queue")
             
-            #Get TAs who have the desired skill set
-            ta_candidates = User().get_ta_candiates(skills)
-            
-                
-            #Collect ta_candidates with matching availablility
-            available_tas = User.get_available_tas(Self, ta_candidates, start_time_iso, end_time)
-                
-            #Out of these TAs who can make it factoring commute time 
-            eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id, end_time)
-            
-            User.hour_checker(eligible_tas, start_time_iso)
+            eligible_tas = User.eligible_tas(skills, start_time, end_time, floor, date, building_id)
             
             #Randomly select a candidate
             best_ta = random.choice(eligible_tas) 
@@ -1072,17 +1121,8 @@ class User:
     #Mode in which admin grants approval pre TA allocation ✅
     #Function for approving/denying shifts in operation mode 2
     def operation_mode_2(skills, start_time, end_time, floor, date, building_id, shift_id, status):
-        #Get TAs who have the desired skill set
-        ta_candidates = User().get_ta_candiates(skills)
-        print("TA Candidates:", ta_candidates)
-                
-        #Collect ta_candidates with matching availablility
-        available_tas = User.get_available_tas(Self, ta_candidates, start_time, end_time)
-        print("Available TAs:", available_tas)
-            
-        #Out of these TAs who can make it factoring commute time    
-        eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id, end_time)
-        print("Eligble TAs:", eligible_tas)
+        
+        eligible_tas = User.eligible_tas(skills, start_time, end_time, floor, date, building_id)
                 
         #Calculates the rarity of each skill in a ranking system
         skill_rarity, all_skill_docs = User.skill_rankings(Self)
@@ -1112,6 +1152,8 @@ class User:
     #Mode in which admin grants approval post TA allocation (Much slower, queue needed must be done one at a time)
     #Function for approving/denying shifts in operation mode 4
     
+    #Change this to 3 everywhere
+    
     def operation_mode_4(skills, start_time, end_time, floor, date, building_id, shift_id, status):
         
         if shift_id == "Not Yet Assigned":
@@ -1136,18 +1178,22 @@ class User:
         #Check if status is pending
         if status == "pending":
             
-            #Get TAs who have the desired skill set
-            ta_candidates = User().get_ta_candiates(skills)
+            eligible_tas = User.eligible_tas(skills, start_time, end_time, floor, date, building_id)
             
-            start_time_iso , end_time_iso = User.convert_to_iso(Self, date, start_time, end_time)
-            
-            #Collect ta_candidates with matching availablility
-            available_tas = User.get_available_tas(Self, ta_candidates, start_time_iso, end_time_iso)
-            print("Available_TAS:", available_tas)
+            #Hadle being empty
+            if not eligible_tas:
                 
-            #Out of these TAs who can make it factoring commute time 
-            eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id, end_time)
-            print("Eligible_TAS:", eligible_tas)
+                #Reject the shift
+                User.deny_request(Self, shift_id, status)
+                
+                
+                best_ta = "Could Not be Assigned"
+                print("Status ff the shift the just got rejected:", status)
+                
+                
+                return best_ta, status, shift_id
+                
+            
             
             #Collect all the skill documents and calculate their rarity
             skill_rarity, all_skill_docs = User.skill_rankings(Self)
@@ -1169,16 +1215,26 @@ class User:
             #Shift has been queued waiting for admin to accept approve a "pending" shift
             print("Processing shift at the front of the queue")
             
-            #Get TAs who have the desired skill set
-            ta_candidates = User().get_ta_candiates(skills)
-                
-            #Collect ta_candidates with matching availablility
-            available_tas = User.get_available_tas(Self, ta_candidates, start_time, end_time)
-                
-            #Out of these TAs who can make it factoring commute time 
-            eligible_tas = User.filter_available_tas(Self, floor, start_time, available_tas, date, building_id, end_time)
+            eligible_tas = User.eligible_tas(skills, start_time, end_time, floor, date, building_id)
             
-            print("Eligible TAs:", eligible_tas)
+            #Hadle being empty
+            if not eligible_tas:
+                
+                #Reject the shift
+                test_shift_status = User.deny_request(Self, shift_id, status)
+                
+                best_ta = "Could Not be Assigned"
+                
+                
+                
+                
+                
+                
+                
+                #Here the status is queued
+                print("Status of the shift that just got rejected:", test_shift_status )
+                
+                return best_ta, status, shift_id
             
             #Collect all the skill documents and calculate their rarity
             skill_rarity, all_skill_docs = User.skill_rankings(Self)
@@ -1213,6 +1269,8 @@ class User:
     
     #Once this is working properly we can then finish the logic for each operation mode
     #We dont need to handle operation modes where the TA is not shown before approval
+    
+    #This needs to handle cases where a shift has been rejected
     def adjust_queue():
         
         #The shift with queue position 1 is the next shift to be processed
@@ -1230,6 +1288,8 @@ class User:
             
             #Calculate new queue position
             new_queue_position = queue_position - 1
+            
+            #We are checking if the shift is at the front of the queue, its been rejected but its still at the front so it will be processed  
             
             #If the current shift is at the front of the queue
             if queue_position == 1:
@@ -1267,10 +1327,19 @@ class User:
             
                 print("Best TA Just Before Update", best_ta)
                 
-                db.shifts.update_one(
-                {"_id": shift["_id"]},
-                {"$set": {"queue_position": new_queue_position, "status": "pending", "ta_id": best_ta}}
-                )
+                #If best_ta is "Could Not be Assigned"
+                if best_ta == "Could Not be Assigned":
+                    db.shifts.update_one(
+                    {"_id": shift["_id"]},
+                    {"$set": {"queue_position": new_queue_position, "ta_id": best_ta}}
+                    )
+                    print("Didnt set its status to pending")
+                
+                else:
+                    db.shifts.update_one(
+                    {"_id": shift["_id"]},
+                    {"$set": {"queue_position": new_queue_position, "status": "pending", "ta_id": best_ta}}
+                    )
                 
                 
             #If the shift isnt at the front of the queue move it forward one position

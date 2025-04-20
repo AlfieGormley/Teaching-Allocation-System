@@ -13,6 +13,7 @@
         <button 
             class="operation-mode-button {{ 'active' if mode.active else '' }}" 
             data-id="{{ mode._id }}"
+            title="{{ mode.description }}"
         >
             Operation Mode {{ mode.operation_mode }}
         </button>
@@ -23,6 +24,8 @@
 
 <div class="pending-shift-card">
     <h2>Pending Shifts Awaiting Admin Approval</h2>
+    <p style="margin-top: -10px; color: #666;"><em>Currently {{ queued_shift_count }} shift{{ 's' if queued_shift_count != 1 else '' }} in queue</em></p>
+
         {% if pending_shifts %}
             <!-- Shift Container -->
             <form name="admin_approval_form"  method="POST">

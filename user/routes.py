@@ -17,6 +17,7 @@ def login():
 
 @app.route('/user/signout')
 def signout():
+    
     return User().signout()
 
 

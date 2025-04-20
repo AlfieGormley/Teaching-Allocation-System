@@ -430,6 +430,7 @@ function showManageEventsButton(event, date) {
 }
 
 
+
 function view_schedule_form(date) {
 
 	//Get the date
@@ -443,9 +444,10 @@ function view_schedule_form(date) {
 
 	//Retrieves schedule for the given date
 	const filtered_schedule = formatted_shifts.filter(slot => slot.date === date);
+	const filtered_availability = availability_data.filter(slot => slot.date === date);
 	
 	
-
+	//Shifts
 	if (filtered_schedule.length > 0) {
 
 		//Iterates over each slot in the array
@@ -487,14 +489,55 @@ function view_schedule_form(date) {
 			slot_element.appendChild(drop_button);
 
 			//Adds the slot element to availability_list
-            schedule_list.appendChild(slot_element);
-
+            schedule_list.appendChild(slot_element)
         });
-	} else {
-		schedule_list.innerHTML = "<p>You have no availability set for this date.</p>";
+
+
 	}
 
+	
+
+	//availability
+	if (filtered_availability.length > 0) {
+		const availHeader = document.createElement("h3");
+		availHeader.textContent = "Your Availability:";
+		schedule_list.appendChild(availHeader);
+
+		filtered_availability.forEach(slot => {
+			const slot_element = document.createElement("div");
+			slot_element.classList.add("schedule-slot");
+
+			const slot_text = document.createElement("p");
+			slot_text.classList.add("schedule-text");
+
+			slot_text.innerHTML = 
+				`<strong>Time:</strong> ${slot.start_time} - ${slot.end_time}`;
+
+			const drop_button = document.createElement("button");
+			drop_button.classList.add("drop-button");
+			drop_button.textContent = "Remove Availability";
+			
+			//Need to link this to the route we have already set up
+			
+			drop_button.setAttribute("data-id", slot._id);
+
+			drop_button.addEventListener("click", () => {
+				
+			});
+
+			slot_element.appendChild(slot_text);
+			slot_element.appendChild(drop_button);
+			schedule_list.appendChild(slot_element);
+		});
+	}
+
+	// No schedule or availability
+	if (filtered_schedule.length === 0 && filtered_availability.length === 0) {
+		schedule_list.innerHTML = "<p>You have no shifts or availability set for this date.</p>";
+	}
 }
+
+
 
 
 

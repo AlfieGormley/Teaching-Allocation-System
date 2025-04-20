@@ -221,6 +221,7 @@ def admin():
             #If TA has been asigned
             if ta_id != "Not Yet Assigned":
                 
+                
                 #Look up the TA
                 ta_data = db.users.find_one({"_id": shift["ta_id"]})
                 
@@ -228,6 +229,9 @@ def admin():
                 
                     #Extract TA name
                     ta_name = ta_data["name"]
+                
+                else:
+                    ta_name = "Not found"
             
             else: 
                 ta_name = "Not Yet Assigned"
@@ -241,6 +245,8 @@ def admin():
                 app.logger.error(f"Building with ID {shift['building']} not found.")
             else:
                 building_name = building_data["name"]
+                
+            
             
             shift_data = {
                 "shift_id": shift["_id"],
@@ -271,9 +277,12 @@ def admin():
     
     user_names = [user['name'] for user in all_users]
     
+    queued_shift_count = db.shifts.count_documents({"status": "queued"})
+
+    
     
 
-    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings, pending_shifts=pending_shifts, operation_modes=operation_modes)
+    return render_template('admin.html', user_names = user_names, compsci_skills=compsci_skills, buildings=buildings, pending_shifts=pending_shifts, operation_modes=operation_modes, queued_shift_count=queued_shift_count)
 
 @app.route('/unauthorized/')
 def unauthorized():
